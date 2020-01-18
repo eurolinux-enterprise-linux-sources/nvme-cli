@@ -127,7 +127,7 @@ static void show_intel_smart_log_jsn(struct nvme_additional_smart_log *smart,
 
 	entry_stats = json_create_object();
 	json_object_add_value_int(entry_stats, "normalized", smart->timed_workload_media_wear.norm);
-	json_object_add_value_float(entry_stats, "raw", ((float)int48_to_long(smart->timed_workload_media_wear.raw)) / 1024);
+	json_object_add_value_float(entry_stats, "raw", ((long double)int48_to_long(smart->timed_workload_media_wear.raw)) / 1024);
 	json_object_add_value_object(dev_stats, "timed_workload_media_wear", entry_stats);
 
 	entry_stats = json_create_object();
@@ -171,7 +171,7 @@ static void show_intel_smart_log_jsn(struct nvme_additional_smart_log *smart,
 	json_object_add_value_object(root, "Device stats", dev_stats);
 
 	json_print_object(root, NULL);
-	printf("/n");
+	printf("\n");
 	json_free_object(root);
 }
 
@@ -229,7 +229,7 @@ static int get_additional_smart_log(int argc, char **argv, struct command *cmd, 
 {
 	struct nvme_additional_smart_log smart_log;
 	int err, fd;
-	char *desc = "Get Intel vendor specific additional smart log (optionally, "\
+	const char *desc = "Get Intel vendor specific additional smart log (optionally, "\
 		      "for the specified namespace), and show it.";
 	const char *namespace = "(optional) desired namespace";
 	const char *raw = "dump output in binary format";
@@ -241,7 +241,7 @@ static int get_additional_smart_log(int argc, char **argv, struct command *cmd, 
 	};
 
 	struct config cfg = {
-		.namespace_id = 0xffffffff,
+		.namespace_id = NVME_NSID_ALL,
 	};
 
 	const struct argconfig_commandline_options command_line_options[] = {
@@ -252,9 +252,10 @@ static int get_additional_smart_log(int argc, char **argv, struct command *cmd, 
 	};
 
 	fd = parse_and_open(argc, argv, desc, command_line_options, &cfg, sizeof(cfg));
+	if (fd < 0)
+		return fd;
 
-	err = nvme_get_log(fd, cfg.namespace_id, 0xca, sizeof(smart_log),
-			&smart_log);
+	err = nvme_get_log(fd, cfg.namespace_id, 0xca, sizeof(smart_log), &smart_log);
 	if (!err) {
 		if (cfg.json)
 			show_intel_smart_log_jsn(&smart_log, cfg.namespace_id, devicename);
@@ -274,7 +275,7 @@ static int get_market_log(int argc, char **argv, struct command *cmd, struct plu
 	char log[512];
 	int err, fd;
 
-	char *desc = "Get Intel Marketing Name log and show it.";
+	const char *desc = "Get Intel Marketing Name log and show it.";
 	const char *raw = "dump output in binary format";
 	struct config {
 		int  raw_binary;
@@ -289,8 +290,10 @@ static int get_market_log(int argc, char **argv, struct command *cmd, struct plu
 	};
 
 	fd = parse_and_open(argc, argv, desc, command_line_options, &cfg, sizeof(cfg));
+	if (fd < 0)
+		return fd;
 
-	err = nvme_get_log(fd, 0xffffffff, 0xdd, sizeof(log), log);
+	err = nvme_get_log(fd, NVME_NSID_ALL, 0xdd, sizeof(log), log);
 	if (!err) {
 		if (!cfg.raw_binary)
 			printf("Intel Marketing Name Log:\n%s\n", log);
@@ -334,7 +337,7 @@ static int get_temp_stats_log(int argc, char **argv, struct command *cmd, struct
 	struct intel_temp_stats stats;
 	int err, fd;
 
-	char *desc = "Get Intel Marketing Name log and show it.";
+	const char *desc = "Get Intel Marketing Name log and show it.";
 	const char *raw = "dump output in binary format";
 	struct config {
 		int  raw_binary;
@@ -349,8 +352,10 @@ static int get_temp_stats_log(int argc, char **argv, struct command *cmd, struct
 	};
 
 	fd = parse_and_open(argc, argv, desc, command_line_options, &cfg, sizeof(cfg));
+	if (fd < 0)
+		return fd;
 
-	err = nvme_get_log(fd, 0xffffffff, 0xc5, sizeof(stats), &stats);
+	err = nvme_get_log(fd, NVME_NSID_ALL, 0xc5, sizeof(stats), &stats);
 	if (!err) {
 		if (!cfg.raw_binary)
 			show_temp_stats(&stats);
@@ -385,11 +390,11 @@ static void show_lat_stats(struct intel_lat_stats *stats, int write)
 
 	printf("\nGroup 2: Range is 1-32ms, step is 1ms\n");
 	for (i = 0; i < 31; i++)
-		printf("Bucket %2d: %u\n", i, stats->bucket_1[i]);
+		printf("Bucket %2d: %u\n", i, stats->bucket_2[i]);
 
 	printf("\nGroup 3: Range is 32-1s, step is 32ms:\n");
 	for (i = 0; i < 31; i++)
-		printf("Bucket %2d: %u\n", i, stats->bucket_1[i]);
+		printf("Bucket %2d: %u\n", i, stats->bucket_3[i]);
 }
 
 static int get_lat_stats_log(int argc, char **argv, struct command *cmd, struct plugin *plugin)
@@ -397,7 +402,7 @@ static int get_lat_stats_log(int argc, char **argv, struct command *cmd, struct 
 	struct intel_lat_stats stats;
 	int err, fd;
 
-	char *desc = "Get Intel Latency Statistics log and show it.";
+	const char *desc = "Get Intel Latency Statistics log and show it.";
 	const char *raw = "dump output in binary format";
 	const char *write = "Get write statistics (read default)";
 	struct config {
@@ -415,8 +420,10 @@ static int get_lat_stats_log(int argc, char **argv, struct command *cmd, struct 
 	};
 
 	fd = parse_and_open(argc, argv, desc, command_line_options, &cfg, sizeof(cfg));
+	if (fd < 0)
+		return fd;
 
-	err = nvme_get_log(fd, 0xffffffff, cfg.write ? 0xc2 : 0xc1, sizeof(stats), &stats);
+	err = nvme_get_log(fd, NVME_NSID_ALL, cfg.write ? 0xc2 : 0xc1, sizeof(stats), &stats);
 	if (!err) {
 		if (!cfg.raw_binary)
 			show_lat_stats(&stats, cfg.write);
@@ -539,7 +546,7 @@ static int read_entire_cmd(struct nvme_passthru_cmd *cmd, int total_size,
 	while (total_size > 0) {
 		err = nvme_submit_passthru(ioctl_fd, NVME_IOCTL_ADMIN_CMD, cmd);
 		if (err) {
-			printf("failed on cmd.data_len %u cmd.cdw13 %u cmd.cdw12 %x cmd.cdw10 %u err %x remaining size %d\n", cmd->data_len, cmd->cdw13, cmd->cdw12, cmd->cdw10, err, total_size);
+			fprintf(stderr, "failed on cmd.data_len %u cmd.cdw13 %u cmd.cdw12 %x cmd.cdw10 %u err %x remaining size %d\n", cmd->data_len, cmd->cdw13, cmd->cdw12, cmd->cdw10, err, total_size);
 			goto out;
 		}
 
@@ -639,18 +646,18 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 	char f[0x100];
 	int err, fd, output, i, j, count = 0, core_num = 1;//, remainder;
 	struct nvme_passthru_cmd cmd;
-	static struct intel_vu_log intel;
-	struct intel_assert_dump *ad;
-	struct intel_vu_nlog *intel_nlog;
-	struct intel_event_header *ehdr;
+	struct intel_cd_log cdlog;
+	struct intel_vu_log *intel = malloc(sizeof(struct intel_vu_log));
+	struct intel_vu_nlog *intel_nlog = (struct intel_vu_nlog *)buf;
+	struct intel_assert_dump *ad = (struct intel_assert_dump *) intel->reserved;
+	struct intel_event_header *ehdr = (struct intel_event_header *)intel->reserved;
 
-
-	char *desc = "Get Intel Firmware Log and save it.";
-	char *log = "Log type: 0, 1, or 2 for nlog, event log, and assert log, respectively.";
-	char *core = "Select which region log should come from. -1 for all";
-	char *nlognum = "Select which nlog to read. -1 for all nlogs";
-	char *file = "Output file; defaults to device name provided";
-	char *verb = "To print out verbose nlog info";
+	const char *desc = "Get Intel Firmware Log and save it.";
+	const char *log = "Log type: 0, 1, or 2 for nlog, event log, and assert log, respectively.";
+	const char *core = "Select which region log should come from. -1 for all";
+	const char *nlognum = "Select which nlog to read. -1 for all nlogs";
+	const char *file = "Output file; defaults to device name provided";
+	const char *verbose = "To print out verbose nlog info";
 	const char *namespace_id = "Namespace to get logs from";
 
 	struct config {
@@ -669,21 +676,23 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 		.core = -1
 	};
 
-	struct intel_cd_log cdlog;
-
 	const struct argconfig_commandline_options command_line_options[] = {
 		{"log",          'l', "NUM",  CFG_POSITIVE, &cfg.log,          required_argument, log},
-		{"region",       'r', "NUM",  CFG_INT, &cfg.core,         required_argument, core},
-		{"nlognum",      'm', "NUM",  CFG_INT, &cfg.lnum,         required_argument, nlognum},
+		{"region",       'r', "NUM",  CFG_INT,      &cfg.core,         required_argument, core},
+		{"nlognum",      'm', "NUM",  CFG_INT,      &cfg.lnum,         required_argument, nlognum},
 		{"namespace-id", 'n', "NUM",  CFG_POSITIVE, &cfg.namespace_id, required_argument, namespace_id},
 		{"output-file",  'o', "FILE", CFG_STRING,   &cfg.file,         required_argument, file},
-		{"verbose_nlog", 'v', ""    , CFG_NONE,     &cfg.verbose,     no_argument, verb},
+		{"verbose_nlog", 'v', ""    , CFG_NONE,     &cfg.verbose,      no_argument,       verbose},
 		{NULL}
 	};
 
 	fd = parse_and_open(argc, argv, desc, command_line_options, &cfg, sizeof(cfg));
-	if (cfg.log > 2 || cfg.core > 4 || cfg.lnum > 255)
+	if (fd < 0)
+		return fd;
+	if (cfg.log > 2 || cfg.core > 4 || cfg.lnum > 255) {
+		free(intel);
 		return EINVAL;
+	}
 
 	if (!cfg.file) {
 		err = setup_file(f, cfg.file, fd, cfg.log);
@@ -692,8 +701,7 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 		cfg.file = f;
 	}
 
-	memset(&cdlog, 0, sizeof(cdlog));
-	memset(&intel_nlog, 0, sizeof(intel_nlog));
+	cdlog.u.entireDword = 0;
 
 	cdlog.u.fields.selectLog = cfg.log;
 	cdlog.u.fields.selectCore = cfg.core < 0 ? 0 : cfg.core;
@@ -704,13 +712,12 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 	err = read_header(&cmd, buf, fd, cdlog.u.entireDword, cfg.namespace_id);
 	if (err)
 		goto out;
-
-	memcpy(&intel, buf, sizeof(intel));
-	cmd.addr = (unsigned long)(void *)buf;
+	memcpy(intel, buf, sizeof(*intel));
 
 	/* for 1.1 Fultondales will use old nlog, but current assert/event */
-	if ((intel.ver.major < 1 && intel.ver.minor < 1) ||
-	    (intel.ver.major <= 1 && intel.ver.minor <= 1 && cfg.log == 0)) {
+	if ((intel->ver.major < 1 && intel->ver.minor < 1) ||
+	    (intel->ver.major <= 1 && intel->ver.minor <= 1 && cfg.log == 0)) {
+		cmd.addr = (unsigned long)(void *)buf;
 		err = get_internal_log_old(buf, output, fd, &cmd);
 		goto out;
 	}
@@ -718,8 +725,8 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 	if (cfg.log == 2) {
 		if (cfg.verbose)
 			printf("Log major:%d minor:%d header:%d size:%d numcores:%d\n",
-			       intel.ver.major, intel.ver.minor, intel.header, intel.size,
-			       intel.numcores);
+			       intel->ver.major, intel->ver.minor, intel->header, intel->size,
+			       intel->numcores);
 
 		err = write_header(buf, output, 0x1000);
 		if (err) {
@@ -727,10 +734,8 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 			goto out;
 		}
 
-		count = intel.numcores;
-		ad = (void *) intel.reserved;
-	} else if (!cfg.log) {
-		intel_nlog = (void*)buf;
+		count = intel->numcores;
+	} else if (cfg.log == 0) {
 		if (cfg.lnum < 0)
 			count = intel_nlog->totalnlogs;
 		else
@@ -738,10 +743,9 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 		if (cfg.core < 0)
 			core_num = intel_nlog->corecount;
 	} else if (cfg.log == 1) {
-		ehdr = (void *) intel.reserved;
-		core_num = intel.numcores;
+		core_num = intel->numcores;
 		count = 1;
-		err = write_header(buf, output, sizeof(intel));
+		err = write_header(buf, output, sizeof(*intel));
 		if (err)
 			goto out;
 	}
@@ -749,7 +753,9 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 	for (j = (cfg.core < 0 ? 0 : cfg.core); j < (cfg.core < 0 ? core_num : cfg.core + 1); j++) {
 		cdlog.u.fields.selectCore = j;
 		for (i = 0; i < count; i++) {
-			if (cfg.log == 0 && ad[i].assertvalid) {
+			if (cfg.log == 2) {
+				if (!ad[i].assertvalid)
+					continue;
 				cmd.cdw13 = ad[i].coreoffset;
 				cmd.cdw10 = 0x400;
 				cmd.data_len = min(0x400, ad[i].assertsize) * 4;
@@ -758,12 +764,13 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 				if (err)
 					goto out;
 
-			} else if(!cfg.log) {
+			} else if(cfg.log == 0) {
 				/* If the user selected to read the entire nlog */
 				if (count > 1)
 					cdlog.u.fields.selectNlog = i;
 
-				err = read_header(&cmd, buf, fd, cdlog.u.entireDword, cfg.namespace_id);
+				err = read_header(&cmd, buf, fd, cdlog.u.entireDword,
+						cfg.namespace_id);
 				if (err)
 					goto out;
 				err = write_header(buf, output, sizeof(*intel_nlog));
@@ -774,7 +781,7 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 				cmd.cdw13 = 0x400;
 				cmd.cdw10 = 0x400;
 				cmd.data_len = min(0x1000, intel_nlog->nlogbytesize);
-				err = read_entire_cmd(&cmd, intel_nlog->nlogbytesize/4,
+				err = read_entire_cmd(&cmd, intel_nlog->nlogbytesize / 4,
 						      0x400, output, fd, buf);
 				if (err)
 					goto out;
@@ -799,6 +806,7 @@ static int get_internal_log(int argc, char **argv, struct command *command, stru
 		err = EIO;
 	} else
 		printf("Successfully wrote log to %s\n", cfg.file);
+	free(intel);
 	return err;
 
 }

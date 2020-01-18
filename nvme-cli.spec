@@ -2,8 +2,8 @@
 #%global shortcommit0 %(c=%{commit0}; echo ${c:0:7})
 
 Name:           nvme-cli
-Version:        1.4
-Release:        3%{?dist}
+Version:        1.6
+Release:        1%{?dist}
 Summary:        NVMe management command line interface
 
 License:        GPLv2+
@@ -12,6 +12,7 @@ URL:            https://github.com/linux-nvme/nvme-cli
 Source0:        https://github.com/linux-nvme/%{name}/archive/v%{version}.tar.gz
 
 BuildRequires:	libuuid-devel
+BuildRequires:	gcc
 
 %description
 nvme-cli provides NVM-Express user space tooling for Linux.
@@ -22,7 +23,7 @@ nvme-cli provides NVM-Express user space tooling for Linux.
 
 
 %build
-make PREFIX=/usr CFLAGS+="%{optflags} -std=c99" LDFLAGS="%{__global_ldflags}" %{?_smp_mflags}
+make PREFIX=/usr CFLAGS="%{optflags} -std=c99" LDFLAGS="%{__global_ldflags}" %{?_smp_mflags}
 
 
 %install
@@ -38,6 +39,15 @@ make PREFIX=/usr CFLAGS+="%{optflags} -std=c99" LDFLAGS="%{__global_ldflags}" %{
 
 
 %changelog
+* Tue Jul 24 2018 luto@kernel.org - 1.6-1
+- Update to 1.6
+
+* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
+* Thu Feb 08 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Wed Nov 22 2017 luto@kernel.org - 1.4-1
 - Update to 1.4
 

@@ -61,6 +61,7 @@ static struct config {
 	char *ctrl_loss_tmo;
 	char *raw;
 	char *device;
+	int  duplicate_connect;
 } cfg = { NULL };
 
 #define BUF_SIZE		4096
@@ -451,7 +452,7 @@ static int nvmf_hostnqn_file(void)
 	if (fgets(hostnqn, sizeof(hostnqn), f) == NULL)
 		goto out;
 
-	cfg.hostnqn = strdup(hostnqn);
+	cfg.hostnqn = strndup(hostnqn, strcspn(hostnqn, "\n"));
 	if (!cfg.hostnqn)
 		goto out;
 
@@ -484,6 +485,38 @@ out:
 	return ret;
 }
 
+static int
+add_bool_argument(char **argstr, int *max_len, char *arg_str, bool arg)
+{
+	int len;
+
+	if (arg) {
+		len = snprintf(*argstr, *max_len, ",%s", arg_str);
+		if (len < 0)
+			return -EINVAL;
+		*argstr += len;
+		*max_len -= len;
+	}
+
+	return 0;
+}
+
+static int
+add_argument(char **argstr, int *max_len, char *arg_str, char *arg)
+{
+	int len;
+
+	if (arg) {
+		len = snprintf(*argstr, *max_len, ",%s=%s", arg_str, arg);
+		if (len < 0)
+			return -EINVAL;
+		*argstr += len;
+		*max_len -= len;
+	}
+
+	return 0;
+}
+
 static int build_options(char *argstr, int max_len)
 {
 	int len;
@@ -500,99 +533,33 @@ static int build_options(char *argstr, int max_len)
 		}
 	}
 
+	/* always specify nqn as first arg - this will init the string */
 	len = snprintf(argstr, max_len, "nqn=%s", cfg.nqn);
 	if (len < 0)
 		return -EINVAL;
 	argstr += len;
 	max_len -= len;
 
-	len = snprintf(argstr, max_len, ",transport=%s", cfg.transport);
-	if (len < 0)
+	if (add_argument(&argstr, &max_len, "transport", cfg.transport) ||
+	    add_argument(&argstr, &max_len, "traddr", cfg.traddr) ||
+	    add_argument(&argstr, &max_len, "host_traddr", cfg.host_traddr) ||
+	    add_argument(&argstr, &max_len, "trsvcid", cfg.trsvcid) ||
+	    ((cfg.hostnqn || nvmf_hostnqn_file()) &&
+		    add_argument(&argstr, &max_len, "hostnqn", cfg.hostnqn)) ||
+	    ((cfg.hostid || nvmf_hostid_file()) &&
+		    add_argument(&argstr, &max_len, "hostid", cfg.hostid)) ||
+	    add_argument(&argstr, &max_len, "nr_io_queues",
+				cfg.nr_io_queues) ||
+	    add_argument(&argstr, &max_len, "queue_size", cfg.queue_size) ||
+	    add_argument(&argstr, &max_len, "keep_alive_tmo",
+				cfg.keep_alive_tmo) ||
+	    add_argument(&argstr, &max_len, "reconnect_delay",
+				cfg.reconnect_delay) ||
+	    add_argument(&argstr, &max_len, "ctrl_loss_tmo",
+				cfg.ctrl_loss_tmo) ||
+	    add_bool_argument(&argstr, &max_len, "duplicate_connect",
+				cfg.duplicate_connect))
 		return -EINVAL;
-	argstr += len;
-	max_len -= len;
-
-	if (cfg.traddr) {
-		len = snprintf(argstr, max_len, ",traddr=%s", cfg.traddr);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.host_traddr) {
-		len = snprintf(argstr, max_len, ",host_traddr=%s", cfg.host_traddr);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.trsvcid) {
-		len = snprintf(argstr, max_len, ",trsvcid=%s", cfg.trsvcid);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.hostnqn || nvmf_hostnqn_file()) {
-		len = snprintf(argstr, max_len, ",hostnqn=%s", cfg.hostnqn);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.hostid || nvmf_hostid_file()) {
-		len = snprintf(argstr, max_len, ",hostid=%s", cfg.hostid);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.nr_io_queues) {
-		len = snprintf(argstr, max_len, ",nr_io_queues=%s",
-				cfg.nr_io_queues);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.queue_size) {
-		len = snprintf(argstr, max_len, ",queue_size=%s",
-				cfg.queue_size);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.keep_alive_tmo) {
-		len = snprintf(argstr, max_len, ",keep_alive_tmo=%s", cfg.keep_alive_tmo);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.reconnect_delay) {
-		len = snprintf(argstr, max_len, ",reconnect_delay=%s", cfg.reconnect_delay);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
-
-	if (cfg.ctrl_loss_tmo) {
-		len = snprintf(argstr, max_len, ",ctrl_loss_tmo=%s", cfg.ctrl_loss_tmo);
-		if (len < 0)
-			return -EINVAL;
-		argstr += len;
-		max_len -= len;
-	}
 
 	return 0;
 }
@@ -632,6 +599,28 @@ static int connect_ctrl(struct nvmf_disc_rsp_page_entry *e)
 			return -EINVAL;
 		p += len;
 	}
+
+	if (cfg.queue_size) {
+		len = sprintf(p, ",queue_size=%s", cfg.queue_size);
+		if (len < 0)
+			return -EINVAL;
+		p += len;
+	}
+
+	if (cfg.nr_io_queues) {
+		len = sprintf(p, ",nr_io_queues=%s", cfg.nr_io_queues);
+		if (len < 0)
+			return -EINVAL;
+		p += len;
+	}
+
+	if (cfg.host_traddr) {
+		len = sprintf(p, ",host_traddr=%s", cfg.host_traddr);
+		if (len < 0)
+			return -EINVAL;
+		p+= len;
+	}
+
 
 	switch (e->trtype) {
 	case NVMF_TRTYPE_LOOP: /* loop */
@@ -677,11 +666,6 @@ static int connect_ctrl(struct nvmf_disc_rsp_page_entry *e)
 			if (len < 0)
 				return -EINVAL;
 			p += len;
-
-			len = sprintf(p, ",host_traddr=%s", cfg.host_traddr);
-			if (len < 0)
-				return -EINVAL;
-			p+= len;
 
 			len = sprintf(p, ",traddr=%.*s",
 				      space_strip_len(NVMF_TRADDR_SIZE, e->traddr),
@@ -752,10 +736,10 @@ static int do_discover(char *argstr, bool connect)
 		break;
 	case DISC_NOT_EQUAL:
 		fprintf(stderr,
-		"Numrec values of last two get dicovery log page not equal\n");
+		"Numrec values of last two get discovery log page not equal\n");
 		break;
 	default:
-		fprintf(stderr, "Get dicovery log page failed: %d\n", ret);
+		fprintf(stderr, "Get discovery log page failed: %d\n", ret);
 		break;
 	}
 
@@ -800,7 +784,9 @@ static int discover_from_conf_file(const char *desc, char *argstr,
 		while ((ptr = strsep(&args, " =\n")) != NULL)
 			argv[argc++] = ptr;
 
-		argconfig_parse(argc, argv, desc, opts, &cfg, sizeof(cfg));
+		err = argconfig_parse(argc, argv, desc, opts, &cfg, sizeof(cfg));
+		if (err)
+			continue;
 
 		err = build_options(argstr, BUF_SIZE);
 		if (err) {
@@ -835,12 +821,18 @@ int discover(const char *desc, int argc, char **argv, bool connect)
 		{"hostnqn",     'q', "LIST", CFG_STRING, &cfg.hostnqn,     required_argument, "user-defined hostnqn (if default not used)" },
 		{"hostid",      'I', "LIST", CFG_STRING, &cfg.hostid,      required_argument, "user-defined hostid (if default not used)"},
 		{"queue-size",  'Q', "LIST", CFG_STRING, &cfg.queue_size,  required_argument, "number of io queue elements to use (default 128)" },
+		{"nr-io-queues",'i', "LIST", CFG_STRING, &cfg.nr_io_queues,required_argument, "number of io queues to use (default is core count)" },
 		{"raw",         'r', "LIST", CFG_STRING, &cfg.raw,         required_argument, "raw output file" },
+		{"keep-alive-tmo",  'k', "LIST", CFG_STRING, &cfg.keep_alive_tmo,  required_argument, "keep alive timeout period in seconds" },
+		{"ctrl-loss-tmo",   'l', "LIST", CFG_STRING, &cfg.ctrl_loss_tmo,   required_argument, "controller loss timeout period in seconds" },
+
 		{NULL},
 	};
 
-	argconfig_parse(argc, argv, desc, command_line_options, &cfg,
+	ret = argconfig_parse(argc, argv, desc, command_line_options, &cfg,
 			sizeof(cfg));
+	if (ret)
+		return ret;
 
 	cfg.nqn = NVME_DISC_SUBSYS_NAME;
 
@@ -873,11 +865,14 @@ int connect(const char *desc, int argc, char **argv)
 		{"keep-alive-tmo",  'k', "LIST", CFG_STRING, &cfg.keep_alive_tmo,  required_argument, "keep alive timeout period in seconds" },
 		{"reconnect-delay", 'c', "LIST", CFG_STRING, &cfg.reconnect_delay, required_argument, "reconnect timeout period in seconds" },
 		{"ctrl-loss-tmo",   'l', "LIST", CFG_STRING, &cfg.ctrl_loss_tmo,   required_argument, "controller loss timeout period in seconds" },
+		{"duplicate_connect", 'D', "", CFG_NONE, &cfg.duplicate_connect, no_argument, "allow duplicate connections between same transport host and subsystem port" },
 		{NULL},
 	};
 
-	argconfig_parse(argc, argv, desc, command_line_options, &cfg,
+	ret = argconfig_parse(argc, argv, desc, command_line_options, &cfg,
 			sizeof(cfg));
+	if (ret)
+		return ret;
 
 	ret = build_options(argstr, BUF_SIZE);
 	if (ret)
@@ -982,7 +977,7 @@ int disconnect(const char *desc, int argc, char **argv)
 {
 	const char *nqn = "nqn name";
 	const char *device = "nvme device";
-	int ret = 0;
+	int ret;
 
 	const struct argconfig_commandline_options command_line_options[] = {
 		{"nqn",    'n', "LIST", CFG_STRING, &cfg.nqn,    required_argument, nqn},
@@ -990,8 +985,11 @@ int disconnect(const char *desc, int argc, char **argv)
 		{NULL},
 	};
 
-	argconfig_parse(argc, argv, desc, command_line_options, &cfg,
+	ret = argconfig_parse(argc, argv, desc, command_line_options, &cfg,
 			sizeof(cfg));
+	if (ret)
+		return ret;
+
 	if (!cfg.nqn && !cfg.device) {
 		fprintf(stderr, "need a -n or -d argument\n");
 		return -EINVAL;
