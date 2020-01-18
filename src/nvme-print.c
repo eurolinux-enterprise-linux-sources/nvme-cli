@@ -106,17 +106,45 @@ static void show_nvme_id_ctrl_oaes(__le32 ctrl_oaes)
 	printf("\n");
 }
 
+static void show_nvme_id_ctrl_ctratt(__le32 ctrl_ctratt)
+{
+	__u32 ctratt = le32_to_cpu(ctrl_ctratt);
+	__u32 rsvd0 = (ctratt & 0xFFFFFFFE) >> 1;
+	__u32 hostid128 = ctratt & 0x1;
+
+	if (rsvd0)
+		printf(" [31:1] : %#x\tReserved\n", rsvd0);
+	printf("  [0:0] : %#x\t128-bit Host Identifier %sSupported\n",
+		hostid128, hostid128 ? "" : "Not ");
+	printf("\n");
+}
+
 static void show_nvme_id_ctrl_oacs(__le16 ctrl_oacs)
 {
 	__u16 oacs = le16_to_cpu(ctrl_oacs);
-	__u16 rsvd = (oacs & 0xFFF0) >> 4;
+	__u16 rsvd = (oacs & 0xFE00) >> 9;
+	__u16 dbc = (oacs & 0x100) >> 8;
+	__u16 vir = (oacs & 0x80) >> 7;
+	__u16 nmi = (oacs & 0x40) >> 6;
+	__u16 dir = (oacs & 0x20) >> 5;
+	__u16 sft = (oacs & 0x10) >> 4;
 	__u16 nsm = (oacs & 0x8) >> 3;
 	__u16 fwc = (oacs & 0x4) >> 2;
 	__u16 fmt = (oacs & 0x2) >> 1;
 	__u16 sec = oacs & 0x1;
 
 	if (rsvd)
-		printf(" [15:4] : %#x\tReserved\n", rsvd);
+		printf(" [15:9] : %#x\tReserved\n", rsvd);
+	printf("  [8:8] : %#x\tDoorbell Buffer Config %sSupported\n",
+		dbc, dbc ? "" : "Not ");
+	printf("  [7:7] : %#x\tVirtualization Management %sSupported\n",
+		vir, vir ? "" : "Not ");
+	printf("  [6:6] : %#x\tNVMe-MI Send and Receive %sSupported\n",
+		nmi, nmi ? "" : "Not ");
+	printf("  [5:5] : %#x\tDirectives %sSupported\n",
+		dir, dir ? "" : "Not ");
+	printf("  [4:4] : %#x\tDevice Self-test %sSupported\n",
+		sft, sft ? "" : "Not ");
 	printf("  [3:3] : %#x\tNS Management and Attachment %sSupported\n",
 		nsm, nsm ? "" : "Not ");
 	printf("  [2:2] : %#x\tFW Commit and Download %sSupported\n",
@@ -146,11 +174,14 @@ static void show_nvme_id_ctrl_frmw(__u8 frmw)
 
 static void show_nvme_id_ctrl_lpa(__u8 lpa)
 {
-	__u8 rsvd = (lpa & 0xFC) >> 2;
+	__u8 rsvd = (lpa & 0xF8) >> 3;
+	__u8 ed = (lpa & 0x4) >> 2;
 	__u8 celp = (lpa & 0x2) >> 1;
 	__u8 smlp = lpa & 0x1;
 	if (rsvd)
-		printf("  [7:2] : %#x\tReserved\n", rsvd);
+		printf("  [7:3] : %#x\tReserved\n", rsvd);
+	printf("  [2:2] : %#x\tExtended data for Get Log Page %sSupported\n",
+		ed, ed ? "" : "Not ");
 	printf("  [1:1] : %#x\tCommand Effects Log Page %sSupported\n",
 		celp, celp ? "" : "Not ");
 	printf("  [0:0] : %#x\tSMART/Health Log Page per NS %sSupported\n",
@@ -198,6 +229,38 @@ static void show_nvme_id_ctrl_rpmbs(__le32 ctrl_rpmbs)
 	printf("\n");
 }
 
+static void show_nvme_id_ctrl_hctma(__le16 ctrl_hctma)
+{
+	__u16 hctma = le16_to_cpu(ctrl_hctma);
+	__u16 rsvd = (hctma & 0xFFFE) >> 1;
+	__u16 hctm = hctma & 0x1;
+
+	if (rsvd)
+		printf(" [15:1] : %#x\tReserved\n", rsvd);
+	printf("  [0:0] : %#x\tHost Controlled Thermal Management %sSupported\n",
+		hctm, hctm ? "" : "Not ");
+	printf("\n");
+}
+
+static void show_nvme_id_ctrl_sanicap(__le32 ctrl_sanicap)
+{
+	__u32 sanicap = le32_to_cpu(ctrl_sanicap);
+	__u32 rsvd = (sanicap & 0xFFFFFFF8) >> 3;
+	__u32 owr = (sanicap & 0x4) >> 2;
+	__u32 ber = (sanicap & 0x2) >> 1;
+	__u32 cer = sanicap & 0x1;
+
+	if (rsvd)
+		printf(" [31:3] : %#x\tReserved\n", rsvd);
+	printf("  [2:2] : %#x\tOverwrite Sanitize Operation %sSupported\n",
+		owr, owr ? "" : "Not ");
+	printf("  [1:1] : %#x\tBlock Erase Sanitize Operation %sSupported\n",
+		ber, ber ? "" : "Not ");
+	printf("  [0:0] : %#x\tCrypto Erase Sanitize Operation %sSupported\n",
+		cer, cer ? "" : "Not ");
+	printf("\n");
+}
+
 static void show_nvme_id_ctrl_sqes(__u8 sqes)
 {
 	__u8 msqes = (sqes & 0xF0) >> 4;
@@ -219,7 +282,8 @@ static void show_nvme_id_ctrl_cqes(__u8 cqes)
 static void show_nvme_id_ctrl_oncs(__le16 ctrl_oncs)
 {
 	__u16 oncs = le16_to_cpu(ctrl_oncs);
-	__u16 rsvd = (oncs & 0xFFC0) >> 6;
+	__u16 rsvd = (oncs & 0xFF80) >> 7;
+	__u16 tmst = (oncs & 0x40) >> 6;
 	__u16 resv = (oncs & 0x20) >> 5;
 	__u16 save = (oncs & 0x10) >> 4;
 	__u16 wzro = (oncs & 0x8) >> 3;
@@ -229,6 +293,8 @@ static void show_nvme_id_ctrl_oncs(__le16 ctrl_oncs)
 
 	if (rsvd)
 		printf(" [15:6] : %#x\tReserved\n", rsvd);
+	printf("  [6:6] : %#x\tTimestamp %sSupported\n",
+		tmst, tmst ? "" : "Not ");
 	printf("  [5:5] : %#x\tReservations %sSupported\n",
 		resv, resv ? "" : "Not ");
 	printf("  [4:4] : %#x\tSave and Select %sSupported\n",
@@ -303,7 +369,9 @@ static void show_nvme_id_ctrl_sgls(__le32 ctrl_sgls)
 	__u32 sglltb = (sgls & 0x40000) >> 18;
 	__u32 bacmdb = (sgls & 0x20000) >> 17;
 	__u32 bbs = (sgls & 0x10000) >> 16;
-	__u32 rsvd1 = (sgls & 0xFFFE) >> 1;
+	__u32 rsvd1 = (sgls & 0xFFF8) >> 3;
+	__u32 key = (sgls & 0x4) >> 2;
+	__u32 rsvd2 = (sgls & 0x2) >> 1;
 	__u32 sglsp = sgls & 0x1;
 
 	if (rsvd0)
@@ -318,9 +386,25 @@ static void show_nvme_id_ctrl_sgls(__le32 ctrl_sgls)
 		printf(" [16:16]: %#x\tSGL Bit-Bucket %sSupported\n",
 			bbs, bbs ? "" : "Not ");
 	if (rsvd1)
-		printf(" [15:1] : %#x\tReserved\n", rsvd1);
+		printf(" [15:3] : %#x\tReserved\n", rsvd1);
+	if (sglsp || (!sglsp && key))
+		printf(" [16:16]: %#x\tKeyed SGL Data Block descriptor %sSupported\n",
+			key, key ? "" : "Not ");
+	if (rsvd2)
+		printf(" [1:1] : %#x\tReserved\n", rsvd2);
 	printf("  [0:0] : %#x\tScatter-Gather Lists %sSupported\n",
 		sglsp, sglsp ? "" : "Not ");
+	printf("\n");
+}
+
+static void show_nvme_id_ctrl_ctrattr(__u8 ctrattr)
+{
+	__u8 rsvd = (ctrattr & 0xFE) >> 1;
+	__u8 scm = ctrattr & 0x1;
+	if (rsvd)
+		printf("  [7:1] : %#x\tReserved\n", rsvd);
+	printf("  [0:0] : %#x\t%s Controller Model\n",
+		scm, scm ? "Static" : "Dynamic");
 	printf("\n");
 }
 
@@ -533,6 +617,124 @@ void show_nvme_id_ns(struct nvme_id_ns *ns, unsigned int mode)
 	}
 }
 
+void json_nvme_id_ns_descs(void *data)
+{
+#ifdef LIBUUID
+	uuid_t uuid;
+	char uuid_str[37];
+#endif
+	__u8 eui64_desc[8];
+	__u8 nguid_desc[16];
+	char nguid_str[2 * sizeof(nguid_desc) + 1];
+	char eui64_str[2 * sizeof(eui64_desc) + 1];
+	char *eui64 = eui64_str;
+	char *nguid = nguid_str;
+	struct json_object *root;
+	off_t off;
+	int pos, len = 0;
+	int i;
+
+	root = json_create_object();
+
+	for (pos = 0; pos < NVME_IDENTIFY_DATA_SIZE; pos += len) {
+		struct nvme_ns_id_desc *cur = data + pos;
+
+		off = pos + sizeof(*cur);
+
+		if (cur->nidl == 0)
+			break;
+
+		switch (cur->nidt) {
+		case NVME_NIDT_EUI64:
+			memset(eui64, 0, sizeof(eui64_str));
+			memcpy(eui64_desc, data + off, sizeof(eui64_desc));
+			for (i = 0; i < sizeof(eui64); i++)
+				eui64 += sprintf(eui64, "%02x", eui64_desc[i]);
+			len += sizeof(eui64);
+			json_object_add_value_string(root, "eui64", eui64_str);
+			break;
+		case NVME_NIDT_NGUID:
+			memset(nguid, 0, sizeof(nguid_str));
+			memcpy(nguid_desc, data + off, sizeof(nguid_desc));
+			for (i = 0; i < sizeof(nguid); i++)
+				nguid += sprintf(nguid, "%02x", nguid_desc[i]);
+			len += sizeof(nguid);
+			json_object_add_value_string(root, "nguid", nguid_str);
+			break;
+#ifdef LIBUUID
+		case NVME_NIDT_UUID:
+			memcpy(uuid, data + off, 16);
+			uuid_unparse_lower(uuid, uuid_str);
+			len += sizeof(uuid);
+			json_object_add_value_string(root, "uuid", uuid_str);
+			break;
+#endif
+		default:
+			/* Skip unnkown types */
+			len = cur->nidl;
+			break;
+		}
+
+		len += sizeof(*cur);
+	}
+
+	json_print_object(root, NULL);
+	printf("\n");
+	json_free_object(root);
+}
+
+void show_nvme_id_ns_descs(void *data)
+{
+	int pos, len = 0;
+	int i;
+#ifdef LIBUUID
+	uuid_t uuid;
+	char uuid_str[37];
+#endif
+	__u8 eui64[8];
+	__u8 nguid[16];
+
+	for (pos = 0; pos < NVME_IDENTIFY_DATA_SIZE; pos += len) {
+		struct nvme_ns_id_desc *cur = data + pos;
+
+		if (cur->nidl == 0)
+			break;
+
+		switch (cur->nidt) {
+		case NVME_NIDT_EUI64:
+			memcpy(eui64, data + pos + sizeof(*cur), sizeof(eui64));
+			printf("eui64   : ");
+			for (i = 0; i < 8; i++)
+				printf("%02x", eui64[i]);
+			printf("\n");
+			len += sizeof(eui64);
+			break;
+		case NVME_NIDT_NGUID:
+			memcpy(nguid, data + pos + sizeof(*cur), sizeof(nguid));
+			printf("nguid   : ");
+			for (i = 0; i < 16; i++)
+				printf("%02x", nguid[i]);
+			printf("\n");
+			len += sizeof(nguid);
+			break;
+#ifdef LIBUUID
+		case NVME_NIDT_UUID:
+			memcpy(uuid, data + pos + sizeof(*cur), 16);
+			uuid_unparse_lower(uuid, uuid_str);
+			printf("uuid    : %s\n", uuid_str);
+			len += sizeof(uuid);
+			break;
+#endif
+		default:
+			/* Skip unnkown types */
+			len = cur->nidl;
+			break;
+		}
+
+		len += sizeof(*cur);
+	}
+}
+
 static void print_ps_power_and_scale(__le16 ctr_power, __u8 scale)
 {
 	__u16 power = le16_to_cpu(ctr_power);
@@ -614,6 +816,9 @@ void __show_nvme_id_ctrl(struct nvme_id_ctrl *ctrl, unsigned int mode, void (*ve
 	printf("oaes    : %#x\n", le32_to_cpu(ctrl->oaes));
 	if (human)
 		show_nvme_id_ctrl_oaes(ctrl->oaes);
+	printf("ctratt  : %#x\n", le32_to_cpu(ctrl->ctratt));
+	if (human)
+		show_nvme_id_ctrl_ctratt(ctrl->ctratt);
 	printf("oacs    : %#x\n", le16_to_cpu(ctrl->oacs));
 	if (human)
 		show_nvme_id_ctrl_oacs(ctrl->oacs);
@@ -643,12 +848,25 @@ void __show_nvme_id_ctrl(struct nvme_id_ctrl *ctrl, unsigned int mode, void (*ve
 	printf("rpmbs   : %#x\n", le32_to_cpu(ctrl->rpmbs));
 	if (human)
 		show_nvme_id_ctrl_rpmbs(ctrl->rpmbs);
+	printf("edstt   : %d\n", le16_to_cpu(ctrl->edstt));
+	printf("dsto    : %d\n", ctrl->dsto);
+	printf("fwug    : %d\n", ctrl->fwug);
+	printf("kas     : %d\n", le16_to_cpu(ctrl->kas));
+	printf("hctma   : %#x\n", le16_to_cpu(ctrl->hctma));
+	if (human)
+		show_nvme_id_ctrl_hctma(ctrl->hctma);
+	printf("mntmt   : %d\n", le16_to_cpu(ctrl->mntmt));
+	printf("mxtmt   : %d\n", le16_to_cpu(ctrl->mxtmt));
+	printf("sanicap : %#x\n", le32_to_cpu(ctrl->sanicap));
+	if (human)
+		show_nvme_id_ctrl_sanicap(ctrl->sanicap);
 	printf("sqes    : %#x\n", ctrl->sqes);
 	if (human)
 		show_nvme_id_ctrl_sqes(ctrl->sqes);
 	printf("cqes    : %#x\n", ctrl->cqes);
 	if (human)
 		show_nvme_id_ctrl_cqes(ctrl->cqes);
+	printf("maxcmd  : %d\n", le16_to_cpu(ctrl->maxcmd));
 	printf("nn      : %d\n", le32_to_cpu(ctrl->nn));
 	printf("oncs    : %#x\n", le16_to_cpu(ctrl->oncs));
 	if (human)
@@ -671,8 +889,14 @@ void __show_nvme_id_ctrl(struct nvme_id_ctrl *ctrl, unsigned int mode, void (*ve
 	printf("sgls    : %x\n", le32_to_cpu(ctrl->sgls));
 	if (human)
 		show_nvme_id_ctrl_sgls(ctrl->sgls);
-
 	printf("subnqn  : %-.*s\n", (int)sizeof(ctrl->subnqn), ctrl->subnqn);
+	printf("ioccsz  : %d\n", le32_to_cpu(ctrl->ioccsz));
+	printf("iorcsz  : %d\n", le32_to_cpu(ctrl->iorcsz));
+	printf("icdoff  : %d\n", le16_to_cpu(ctrl->icdoff));
+	printf("ctrattr : %x\n", ctrl->ctrattr);
+	if (human)
+		show_nvme_id_ctrl_ctrattr(ctrl->ctrattr);
+	printf("msdbd   : %d\n", ctrl->msdbd);
 
 	show_nvme_id_ctrl_power(ctrl);
 	if (vendor_show)
@@ -711,28 +935,52 @@ void show_error_log(struct nvme_error_log_page *err_log, int entries, const char
 	}
 }
 
-void show_nvme_resv_report(struct nvme_reservation_status *status)
+void show_nvme_resv_report(struct nvme_reservation_status *status, int bytes, __u32 cdw11)
 {
-	int i, regctl;
+	int i, j, regctl, entries;
 
 	regctl = status->regctl[0] | (status->regctl[1] << 8);
 
 	printf("\nNVME Reservation status:\n\n");
 	printf("gen       : %d\n", le32_to_cpu(status->gen));
-	printf("regctl    : %d\n", regctl);
 	printf("rtype     : %d\n", status->rtype);
+	printf("regctl    : %d\n", regctl);
 	printf("ptpls     : %d\n", status->ptpls);
 
-	for (i = 0; i < regctl; i++) {
-		printf("regctl[%d] :\n", i);
-		printf("  cntlid  : %x\n", le16_to_cpu(status->regctl_ds[i].cntlid));
-		printf("  rcsts   : %x\n", status->regctl_ds[i].rcsts);
-		printf("  hostid  : %"PRIx64"\n", (uint64_t)le64_to_cpu(status->regctl_ds[i].hostid));
-		printf("  rkey    : %"PRIx64"\n", (uint64_t)le64_to_cpu(status->regctl_ds[i].rkey));
+	/* check Extended Data Structure bit */
+	if ((cdw11 & 0x1) == 0) {
+		/* if status buffer was too small, don't loop past the end of the buffer */
+		entries = (bytes - 24) / 24;
+		if (entries < regctl)
+			regctl = entries;
+
+		for (i = 0; i < regctl; i++) {
+			printf("regctl[%d] :\n", i);
+			printf("  cntlid  : %x\n", le16_to_cpu(status->regctl_ds[i].cntlid));
+			printf("  rcsts   : %x\n", status->regctl_ds[i].rcsts);
+			printf("  hostid  : %"PRIx64"\n", (uint64_t)le64_to_cpu(status->regctl_ds[i].hostid));
+			printf("  rkey    : %"PRIx64"\n", (uint64_t)le64_to_cpu(status->regctl_ds[i].rkey));
+		}
+	} else {
+		struct nvme_reservation_status_ext *ext_status = (struct nvme_reservation_status_ext *)status;
+		/* if status buffer was too small, don't loop past the end of the buffer */
+		entries = (bytes - 64) / 64;
+		if (entries < regctl)
+			regctl = entries;
+
+		for (i = 0; i < regctl; i++) {
+			printf("regctlext[%d] :\n", i);
+			printf("  cntlid     : %x\n", le16_to_cpu(ext_status->regctl_eds[i].cntlid));
+			printf("  rcsts      : %x\n", ext_status->regctl_eds[i].rcsts);
+			printf("  rkey       : %"PRIx64"\n", (uint64_t)le64_to_cpu(ext_status->regctl_eds[i].rkey));
+			printf("  hostid     : ");
+			for (j = 0; j < 16; j++)
+				printf("%x", ext_status->regctl_eds[i].hostid[j]);
+			printf("\n");
+		}
 	}
 	printf("\n");
 }
-
 
 static char *fw_to_string(__u64 fw)
 {
@@ -773,9 +1021,9 @@ uint64_t int48_to_long(__u8 *data)
 void show_smart_log(struct nvme_smart_log *smart, unsigned int nsid, const char *devname)
 {
 	/* convert temperature from Kelvin to Celsius */
-	int c;
 	int temperature = ((smart->temperature[1] << 8) |
 		smart->temperature[0]) - 273;
+	int i;
 
 	printf("Smart Log for NVME device:%s namespace-id:%x\n", devname, nsid);
 	printf("critical_warning                    : %#x\n", smart->critical_warning);
@@ -805,14 +1053,18 @@ void show_smart_log(struct nvme_smart_log *smart, unsigned int nsid, const char 
 		int128_to_double(smart->num_err_log_entries));
 	printf("Warning Temperature Time            : %u\n", le32_to_cpu(smart->warning_temp_time));
 	printf("Critical Composite Temperature Time : %u\n", le32_to_cpu(smart->critical_comp_time));
-	for (c=0; c < 8; c++) {
-		__s32 temp = le16_to_cpu(smart->temp_sensor[c]);
+	for (i = 0; i < 8; i++) {
+		__s32 temp = le16_to_cpu(smart->temp_sensor[i]);
 
 		if (temp == 0)
 			continue;
-		printf("Temperature Sensor %d                : %d C\n", c + 1,
+		printf("Temperature Sensor %d                : %d C\n", i + 1,
 			temp - 273);
 	}
+	printf("Thermal Management T1 Trans Count   : %u\n", le32_to_cpu(smart->thm_temp1_trans_count));
+	printf("Thermal Management T2 Trans Count   : %u\n", le32_to_cpu(smart->thm_temp2_trans_count));
+	printf("Thermal Management T1 Total Time    : %u\n", le32_to_cpu(smart->thm_temp1_total_time));
+	printf("Thermal Management T2 Total Time    : %u\n", le32_to_cpu(smart->thm_temp2_total_time));
 }
 
 char *nvme_feature_to_string(int feature)
@@ -831,6 +1083,7 @@ char *nvme_feature_to_string(int feature)
 	case NVME_FEAT_ASYNC_EVENT:	return "Async Event Configuration";
 	case NVME_FEAT_AUTO_PST:	return "Autonomous Power State Transition";
 	case NVME_FEAT_HOST_MEM_BUF:	return "Host Memory Buffer";
+	case NVME_FEAT_KATO:		return "Keep Alive Timer";
 	case NVME_FEAT_SW_PROGRESS:	return "Software Progress";
 	case NVME_FEAT_HOST_ID:		return "Host Identifier";
 	case NVME_FEAT_RESV_MASK:	return "Reservation Notification Mask";
@@ -867,6 +1120,8 @@ char *nvme_status_to_string(__u32 status)
 	case NVME_SC_FUSED_MISSING:		return "FUSED_MISSING";
 	case NVME_SC_INVALID_NS:		return "INVALID_NS";
 	case NVME_SC_CMD_SEQ_ERROR:		return "CMD_SEQ_ERROR";
+	case NVME_SC_SANITIZE_FAILED:		return "SANITIZE_FAILED";
+	case NVME_SC_SANITIZE_IN_PROGRESS:	return "SANITIZE_IN_PROGRESS";
 	case NVME_SC_LBA_RANGE:			return "LBA_RANGE";
 	case NVME_SC_CAP_EXCEEDED:		return "CAP_EXCEEDED";
 	case NVME_SC_NS_NOT_READY:		return "NS_NOT_READY";
@@ -1005,6 +1260,57 @@ static void show_host_mem_buffer(struct nvme_host_mem_buffer *hmb)
 	printf("\tHost Memory Buffer Size                  (HSIZE): %u\n", hmb->hsize);
 }
 
+void nvme_directive_show_fields(__u8 dtype, __u8 doper, unsigned int result, unsigned char *buf)
+{
+        __u8 *field = buf;
+        int count, i;
+        switch (dtype) {
+        case NVME_DIR_IDENTIFY:
+                switch (doper) {
+                case NVME_DIR_RCV_ID_OP_PARAM:
+                        printf("\tDirective support \n");
+                        printf("\t\tIdentify Directive  : %s\n", (*field & 0x1) ? "supported":"not supported");
+                        printf("\t\tStream Directive    : %s\n", (*field & 0x2) ? "supported":"not supported");
+                        printf("\tDirective status \n");
+                        printf("\t\tIdentify Directive  : %s\n", (*(field + 32) & 0x1) ? "enabled" : "disabled");
+                        printf("\t\tStream Directive    : %s\n", (*(field + 32) & 0x2) ? "enabled" : "disabled");
+                        break;
+                default:
+                        fprintf(stderr, "invalid directive operations for Identify Directives\n");
+                }
+                break;
+        case NVME_DIR_STREAMS:
+                switch (doper) {
+                case NVME_DIR_RCV_ST_OP_PARAM:
+                        printf("\tMax Streams Limit                          (MSL): %u\n", *(__u16 *) field);
+                        printf("\tNVM Subsystem Streams Available           (NSSA): %u\n", *(__u16 *) (field + 2));
+                        printf("\tNVM Subsystem Streams Open                (NSSO): %u\n", *(__u16 *) (field + 4));
+                        printf("\tStream Write Size (in unit of LB size)     (SWS): %u\n", *(__u32 *) (field + 16));
+                        printf("\tStream Granularity Size (in unit of SWS)   (SGS): %u\n", *(__u16 *) (field + 20));
+                        printf("\tNamespece Streams Allocated                (NSA): %u\n", *(__u16 *) (field + 22));
+                        printf("\tNamespace Streams Open                     (NSO): %u\n", *(__u16 *) (field + 24));
+                        break;
+                case NVME_DIR_RCV_ST_OP_STATUS:
+                        count = *(__u16 *) field;
+                        printf("\tOpen Stream Count  : %u\n", *(__u16 *) field);
+                        for ( i = 0; i < count; i++ ) {
+                                printf("\tStream Identifier %.6u : %u\n", i + 1, *(__u16 *) (field + ((i + 1) * 2)));
+                        }
+                        break;
+                case NVME_DIR_RCV_ST_OP_RESOURCE:
+                        printf("\tNamespace Streams Allocated (NSA): %u\n", result & 0xffff);
+                        break;
+                default:
+                        fprintf(stderr, "invalid directive operations for Streams Directives\n");
+                }
+                break;
+        default:
+                fprintf(stderr, "invalid directive type\n");
+                break;
+        }
+        return;
+}
+
 void nvme_feature_show_fields(__u32 fid, unsigned int result, unsigned char *buf)
 {
 	__u8 field;
@@ -1036,7 +1342,7 @@ void nvme_feature_show_fields(__u32 fid, unsigned int result, unsigned char *buf
 		printf("\tThreshold Type Select         (THSEL): %u - %s\n", field, nvme_feature_temp_type_to_string(field));
 		field = (result & 0x000f0000) >> 16;
 		printf("\tThreshold Temperature Select (TMPSEL): %u - %s\n", field, nvme_feature_temp_sel_to_string(field));
-		printf("\tTemperature Threshold         (TMPTH): %u C\n", (result & 0x0000ffff) - 273);
+		printf("\tTemperature Threshold         (TMPTH): %d C\n", (result & 0x0000ffff) - 273);
 		break;
 	case NVME_FEAT_ERR_RECOVERY:
 		printf("\tDeallocated or Unwritten Logical Block Error Enable (DULBE): %s\n", ((result & 0x00010000) >> 16) ? "Enabled":"Disabled");
@@ -1252,6 +1558,7 @@ void json_nvme_id_ctrl(struct nvme_id_ctrl *ctrl, unsigned int mode, void (*vs)(
 	json_object_add_value_int(root, "rtd3r", le32_to_cpu(ctrl->rtd3r));
 	json_object_add_value_int(root, "rtd3e", le32_to_cpu(ctrl->rtd3e));
 	json_object_add_value_int(root, "oaes", le32_to_cpu(ctrl->oaes));
+	json_object_add_value_int(root, "ctratt", le32_to_cpu(ctrl->ctratt));
 	json_object_add_value_int(root, "oacs", le16_to_cpu(ctrl->oacs));
 	json_object_add_value_int(root, "acl", ctrl->acl);
 	json_object_add_value_int(root, "aerl", ctrl->aerl);
@@ -1269,8 +1576,17 @@ void json_nvme_id_ctrl(struct nvme_id_ctrl *ctrl, unsigned int mode, void (*vs)(
 	json_object_add_value_float(root, "tnvmcap", tnvmcap);
 	json_object_add_value_float(root, "unvmcap", unvmcap);
 	json_object_add_value_int(root, "rpmbs", le32_to_cpu(ctrl->rpmbs));
+	json_object_add_value_int(root, "edstt", le16_to_cpu(ctrl->edstt));
+	json_object_add_value_int(root, "dsto", ctrl->dsto);
+	json_object_add_value_int(root, "fwug", ctrl->fwug);
+	json_object_add_value_int(root, "kas", le16_to_cpu(ctrl->kas));
+	json_object_add_value_int(root, "hctma", le16_to_cpu(ctrl->hctma));
+	json_object_add_value_int(root, "mntmt", le16_to_cpu(ctrl->mntmt));
+	json_object_add_value_int(root, "mxtmt", le16_to_cpu(ctrl->mxtmt));
+	json_object_add_value_int(root, "sanicap", le32_to_cpu(ctrl->sanicap));
 	json_object_add_value_int(root, "sqes", ctrl->sqes);
 	json_object_add_value_int(root, "cqes", ctrl->cqes);
+	json_object_add_value_int(root, "maxcmd", le16_to_cpu(ctrl->maxcmd));
 	json_object_add_value_int(root, "nn", le32_to_cpu(ctrl->nn));
 	json_object_add_value_int(root, "oncs", le16_to_cpu(ctrl->oncs));
 	json_object_add_value_int(root, "fuses", le16_to_cpu(ctrl->fuses));
@@ -1284,6 +1600,12 @@ void json_nvme_id_ctrl(struct nvme_id_ctrl *ctrl, unsigned int mode, void (*vs)(
 
 	if (strlen(subnqn))
 		json_object_add_value_string(root, "subnqn", subnqn);
+
+	json_object_add_value_int(root, "ioccsz", le32_to_cpu(ctrl->ioccsz));
+	json_object_add_value_int(root, "iorcsz", le32_to_cpu(ctrl->iorcsz));
+	json_object_add_value_int(root, "icdoff", le16_to_cpu(ctrl->icdoff));
+	json_object_add_value_int(root, "ctrattr", ctrl->ctrattr);
+	json_object_add_value_int(root, "msdbd", ctrl->msdbd);
 
 	psds = json_create_array();
 	json_object_add_value_array(root, "psds", psds);
@@ -1351,33 +1673,63 @@ void json_error_log(struct nvme_error_log_page *err_log, int entries, const char
 	json_free_object(root);
 }
 
-void json_nvme_resv_report(struct nvme_reservation_status *status)
+void json_nvme_resv_report(struct nvme_reservation_status *status, int bytes, __u32 cdw11)
 {
 	struct json_object *root;
 	struct json_array *rcs;
-	int i, regctl;
+	int i, j, regctl, entries;
 
 	regctl = status->regctl[0] | (status->regctl[1] << 8);
 
 	root = json_create_object();
 
 	json_object_add_value_int(root, "gen", le32_to_cpu(status->gen));
-	json_object_add_value_int(root, "regctl", regctl);
 	json_object_add_value_int(root, "rtype", status->rtype);
+	json_object_add_value_int(root, "regctl", regctl);
 	json_object_add_value_int(root, "ptpls", status->ptpls);
 
 	rcs = json_create_array();
-	json_object_add_value_array(root, "regctls", rcs);
+        /* check Extended Data Structure bit */
+        if ((cdw11 & 0x1) == 0) {
+                /* if status buffer was too small, don't loop past the end of the buffer */
+                entries = (bytes - 24) / 24;
+                if (entries < regctl)
+                        regctl = entries;
 
-	for (i = 0; i < regctl; i++) {
-		struct json_object *rc = json_create_object();
+		json_object_add_value_array(root, "regctls", rcs);
+		for (i = 0; i < regctl; i++) {
+			struct json_object *rc = json_create_object();
 
-		json_object_add_value_int(rc, "cntlid", le16_to_cpu(status->regctl_ds[i].cntlid));
-		json_object_add_value_int(rc, "rcsts", status->regctl_ds[i].rcsts);
-		json_object_add_value_int(rc, "hostid", (uint64_t)le64_to_cpu(status->regctl_ds[i].hostid));
-		json_object_add_value_int(rc, "rkey", (uint64_t)le64_to_cpu(status->regctl_ds[i].rkey));
+			json_object_add_value_int(rc, "cntlid", le16_to_cpu(status->regctl_ds[i].cntlid));
+			json_object_add_value_int(rc, "rcsts", status->regctl_ds[i].rcsts);
+			json_object_add_value_int(rc, "hostid", (uint64_t)le64_to_cpu(status->regctl_ds[i].hostid));
+			json_object_add_value_int(rc, "rkey", (uint64_t)le64_to_cpu(status->regctl_ds[i].rkey));
 
-		json_array_add_value_object(rcs, rc);
+			json_array_add_value_object(rcs, rc);
+		}
+	} else {
+		struct nvme_reservation_status_ext *ext_status = (struct nvme_reservation_status_ext *)status;
+		char	hostid[33];
+
+                /* if status buffer was too small, don't loop past the end of the buffer */
+                entries = (bytes - 64) / 64;
+                if (entries < regctl)
+                        regctl = entries;
+
+		json_object_add_value_array(root, "regctlext", rcs);
+		for (i = 0; i < regctl; i++) {
+			struct json_object *rc = json_create_object();
+
+			json_object_add_value_int(rc, "cntlid", le16_to_cpu(ext_status->regctl_eds[i].cntlid));
+			json_object_add_value_int(rc, "rcsts", ext_status->regctl_eds[i].rcsts);
+			json_object_add_value_int(rc, "rkey", (uint64_t)le64_to_cpu(ext_status->regctl_eds[i].rkey));
+			for (j = 0; j < 16; j++)
+				sprintf(hostid + j * 2, "%02x", ext_status->regctl_eds[i].hostid[j]);
+
+			json_object_add_value_string(rc, "hostid", hostid);
+
+			json_array_add_value_object(rcs, rc);
+		}
 	}
 
 	json_print_object(root, NULL);
@@ -1408,13 +1760,14 @@ void json_fw_log(struct nvme_firmware_log_page *fw_log, const char *devname)
 
 	json_print_object(root, NULL);
 	printf("\n");
-	json_free_object(fwsi);
 	json_free_object(root);
 }
 
 void json_smart_log(struct nvme_smart_log *smart, unsigned int nsid, const char *devname)
 {
 	struct json_object *root;
+	int c;
+	char key[21];
 
 	unsigned int temperature = ((smart->temperature[1] << 8) |
 		smart->temperature[0]);
@@ -1451,6 +1804,24 @@ void json_smart_log(struct nvme_smart_log *smart, unsigned int nsid, const char 
 			le32_to_cpu(smart->warning_temp_time));
 	json_object_add_value_int(root, "critical_comp_time",
 			le32_to_cpu(smart->critical_comp_time));
+
+	for (c=0; c < 8; c++) {
+		__s32 temp = le16_to_cpu(smart->temp_sensor[c]);
+
+		if (temp == 0)
+			continue;
+		sprintf(key, "temperature_sensor_%d",c+1);
+		json_object_add_value_int(root, key, temp);
+	}
+
+	json_object_add_value_int(root, "thm_temp1_trans_count",
+			le32_to_cpu(smart->thm_temp1_trans_count));
+	json_object_add_value_int(root, "thm_temp2_trans_count",
+			le32_to_cpu(smart->thm_temp2_trans_count));
+	json_object_add_value_int(root, "thm_temp1_total_time",
+			le32_to_cpu(smart->thm_temp1_total_time));
+	json_object_add_value_int(root, "thm_temp2_total_time",
+			le32_to_cpu(smart->thm_temp2_total_time));
 
 	json_print_object(root, NULL);
 	printf("\n");
@@ -1554,8 +1925,8 @@ static void show_registers_csts(__u32 csts)
 
 static void show_registers_aqa(__u32 aqa)
 {
-	printf("\tAdmin Completion Queue Size (ACQS): %u bytes\n", ((aqa & 0x0fff0000) >> 16)+1);
-	printf("\tAdmin Submission Queue Size (ASQS): %u bytes\n\n", (aqa & 0x00000fff)+1);
+	printf("\tAdmin Completion Queue Size (ACQS): %u\n", ((aqa & 0x0fff0000) >> 16)+1);
+	printf("\tAdmin Submission Queue Size (ASQS): %u\n\n", (aqa & 0x00000fff)+1);
 
 }
 

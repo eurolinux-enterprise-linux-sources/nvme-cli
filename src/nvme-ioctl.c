@@ -58,6 +58,16 @@ int nvme_reset_controller(int fd)
 	return ioctl(fd, NVME_IOCTL_RESET);
 }
 
+int nvme_ns_rescan(int fd)
+{
+	int ret;
+
+	ret = nvme_verify_chr(fd);
+	if (ret)
+		return ret;
+	return ioctl(fd, NVME_IOCTL_RESCAN);
+}
+
 int nvme_get_nsid(int fd)
 {
 	static struct stat nvme_stat;
@@ -138,8 +148,8 @@ int nvme_io(int fd, __u8 opcode, __u64 slba, __u16 nblocks, __u16 control,
 		.slba		= slba,
 		.dsmgmt		= dsmgmt,
 		.reftag		= reftag,
-		.appmask	= apptag,
-		.apptag		= appmask,
+		.appmask	= appmask,
+		.apptag		= apptag,
 	};
 	return ioctl(fd, NVME_IOCTL_SUBMIT_IO, &io);
 }
@@ -300,12 +310,13 @@ int nvme_resv_release(int fd, __u32 nsid, __u8 rtype, __u8 rrela,
 	return nvme_submit_io_passthru(fd, &cmd);
 }
 
-int nvme_resv_report(int fd, __u32 nsid, __u32 numd, void *data)
+int nvme_resv_report(int fd, __u32 nsid, __u32 numd, __u32 cdw11, void *data)
 {
 	struct nvme_passthru_cmd cmd = {
 		.opcode		= nvme_cmd_resv_report,
 		.nsid		= nsid,
 		.cdw10		= numd,
+		.cdw11		= cdw11,
 		.addr		= (__u64)(uintptr_t) data,
 		.data_len	= numd << 2,
 	};
@@ -352,7 +363,7 @@ int nvme_identify_ns(int fd, __u32 nsid, bool present, void *data)
 
 int nvme_identify_ns_list(int fd, __u32 nsid, bool all, void *data)
 {
-	int cns = all ? NVME_ID_CNS_NS_ACTIVE_LIST : NVME_ID_CNS_NS_PRESENT_LIST;
+	int cns = all ? NVME_ID_CNS_NS_PRESENT_LIST : NVME_ID_CNS_NS_ACTIVE_LIST;
 
 	return nvme_identify(fd, nsid, cns, data);
 }
@@ -362,6 +373,12 @@ int nvme_identify_ctrl_list(int fd, __u32 nsid, __u16 cntid, void *data)
 	int cns = nsid ? NVME_ID_CNS_CTRL_NS_LIST : NVME_ID_CNS_CTRL_LIST;
 
 	return nvme_identify(fd, nsid, (cntid << 16) | cns, data);
+}
+
+int nvme_identify_ns_descs(int fd, __u32 nsid, void *data)
+{
+
+	return nvme_identify(fd, nsid, NVME_ID_CNS_NS_DESC_LIST, data);
 }
 
 int nvme_get_log(int fd, __u32 nsid, __u8 log_id, __u32 data_len, void *data)
@@ -581,3 +598,44 @@ int nvme_sec_recv(int fd, __u32 nsid, __u8 nssf, __u16 spsp,
 		*result = cmd.result;
 	return err;
 }
+
+int nvme_dir_send(int fd, __u32 nsid, __u16 dspec, __u8 dtype, __u8 doper,
+                  __u32 data_len, __u32 dw12, void *data, __u32 *result)
+{
+        struct nvme_admin_cmd cmd = {
+                .opcode         = nvme_admin_directive_send,
+                .addr           = (__u64)(uintptr_t) data,
+                .data_len       = data_len,
+                .nsid           = nsid,
+                .cdw10          = data_len? (data_len >> 2) - 1 : 0,
+                .cdw11          = dspec << 16 | dtype << 8 | doper,
+                .cdw12          = dw12,
+        };
+        int err;
+
+        err = nvme_submit_admin_passthru(fd, &cmd);
+        if (!err && result)
+                *result = cmd.result;
+        return err;
+}
+
+int nvme_dir_recv(int fd, __u32 nsid, __u16 dspec, __u8 dtype, __u8 doper,
+                  __u32 data_len, __u32 dw12, void *data, __u32 *result)
+{
+        struct nvme_admin_cmd cmd = {
+                .opcode         = nvme_admin_directive_recv,
+                .addr           = (__u64)(uintptr_t) data,
+                .data_len       = data_len,
+                .nsid           = nsid,
+                .cdw10          = data_len? (data_len >> 2) - 1 : 0,
+                .cdw11          = dspec << 16 | dtype << 8 | doper,
+                .cdw12          = dw12,
+        };
+        int err;
+
+        err = nvme_submit_admin_passthru(fd, &cmd);
+        if (!err && result)
+                *result = cmd.result;
+        return err;
+}
+
