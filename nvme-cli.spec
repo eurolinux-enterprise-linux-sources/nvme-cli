@@ -3,13 +3,20 @@
 
 Name:           nvme-cli
 Version:        1.6
-Release:        1%{?dist}
+Release:        4%{?dist}
 Summary:        NVMe management command line interface
 
 License:        GPLv2+
 URL:            https://github.com/linux-nvme/nvme-cli
 #Source0:        https://github.com/linux-nvme/%{name}/archive/%{commit0}.tar.gz
 Source0:        https://github.com/linux-nvme/%{name}/archive/v%{version}.tar.gz
+
+Patch0:         0001-nvme-discover-Retry-discovery-log-if-the-generation-.patch
+Patch1:         0002-nvme-ioctl-retrieve-log-pages-in-4k-chunks.patch
+Patch2:         0003-nvme-discover-Re-check-generation-counter-after-log-.patch
+Patch3:         0004-nvme-cli-report-subsystem-reset-not-supported-by-con.patch
+Patch4:         0005-nvme-list-fix-nvme-list-output-if-identify-failed-on.patch
+Patch5:         0006-nvme-rem-first-perror-on-subsystem-reset-failure-.patch
 
 BuildRequires:	libuuid-devel
 BuildRequires:	gcc
@@ -20,7 +27,12 @@ nvme-cli provides NVM-Express user space tooling for Linux.
 %prep
 #%setup -qn %{name}-%{commit0}
 %setup
-
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
 
 %build
 make PREFIX=/usr CFLAGS="%{optflags} -std=c99" LDFLAGS="%{__global_ldflags}" %{?_smp_mflags}
@@ -37,8 +49,34 @@ make PREFIX=/usr CFLAGS="%{optflags} -std=c99" LDFLAGS="%{__global_ldflags}" %{?
 %{_mandir}/man1/nvme*.gz
 %{_datadir}/bash_completion.d/nvme
 
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post
+if [ $1 = 1 ]; then # 1 : This package is being installed for the first time
+	if [ ! -f /etc/nvme/hostnqn ]; then
+		install -D /dev/null /etc/nvme/hostnqn
+		echo $(nvme gen-hostnqn) > /etc/nvme/hostnqn
+		chmod 644 /etc/nvme/hostnqn
+        fi
+        if [ ! -f /etc/nvme/hostid ]; then
+                uuidgen > /etc/nvme/hostid
+        fi
+fi
+
+%preun
+if [ -d /etc/nvme ]; then
+	rm -f /etc/nvme/hostnqn
+	rm -f /etc/nvme/hostid
+	if [ ! -n "`ls -A /etc/nvme`" ]; then
+		rm -rf /etc/nvme
+	fi
+fi
 
 %changelog
+* Tue Oct 16 2018 dmilburn@redhat.com - 1.6-2
+- Pull in upstream fixes
+
 * Tue Jul 24 2018 luto@kernel.org - 1.6-1
 - Update to 1.6
 

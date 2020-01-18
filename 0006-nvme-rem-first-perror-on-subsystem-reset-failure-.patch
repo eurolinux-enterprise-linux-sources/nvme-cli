@@ -1,0 +1,25 @@
+From 54a00bda868ca1e45633965841b18dcece69fd3c Mon Sep 17 00:00:00 2001
+From: David Milburn <dmilburn@redhat.com>
+Date: Wed, 9 Jan 2019 09:05:46 -0600
+Subject: [PATCH] nvme-cli: remove first perror on subsystem reset failure
+
+Signed-off-by: David Milburn <dmilburn@redhat.com>
+---
+ nvme.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/nvme.c b/nvme.c
+index 0185cb5..2dc0822 100644
+--- a/nvme.c
++++ b/nvme.c
+@@ -2602,7 +2602,6 @@ static int subsystem_reset(int argc, char **argv, struct command *cmd, struct pl
+ 	err = nvme_subsystem_reset(fd);
+ 	if (err < 0) {
+ 		close(fd);
+-		perror("Subsystem-reset");
+ 		if (errno == ENOTTY)
+ 			fprintf(stderr,
+ 				"Subsystem-reset: NVM Subsystem Reset not supported.\n");
+-- 
+1.8.3.1
+

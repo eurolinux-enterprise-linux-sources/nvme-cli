@@ -1,0 +1,49 @@
+From 705ba547240fb340f9fd6caf4c1a988218dec557 Mon Sep 17 00:00:00 2001
+From: David Milburn <dmilburn@redhat.com>
+Date: Tue, 18 Dec 2018 15:52:57 -0600
+Subject: [PATCH 4/5] nvme-cli: report subsystem-reset not supported by
+ controller
+
+commit 8faa66131151fc2dca5df67881cd7176086421b6
+Author: David Milburn <dmilburn@redhat.com>
+Date:   Wed Sep 26 08:25:57 2018 -0500
+
+    nvme-cli: report subsystem-reset not supported by controller
+
+    Add a little more description for "nvme subsystem-reset"
+    failures, currently driver reports "Inappropriate ioctl
+    for device".
+
+    $ nvme subsystem-reset /dev/nvme0
+    Subsystem-reset: Inappropriate ioctl for device
+
+    With this change report controller doesn't support
+    NVM Subsystem Reset.
+
+    $ nvme subsystem-reset /dev/nvme0
+    Subsystem-reset: NVM Subsystem Reset not supported.
+
+Signed-off-by: David Milburn <dmilburn@redhat.com>
+---
+ nvme.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/nvme.c b/nvme.c
+index 4815caa..0722132 100644
+--- a/nvme.c
++++ b/nvme.c
+@@ -2392,6 +2392,11 @@ static int subsystem_reset(int argc, char **argv, struct command *cmd, struct pl
+ 	if (err < 0) {
+ 		close(fd);
+ 		perror("Subsystem-reset");
++		if (errno == ENOTTY)
++			fprintf(stderr,
++				"Subsystem-reset: NVM Subsystem Reset not supported.\n");
++		else
++			perror("Subsystem-reset");
+ 		return errno;
+ 	}
+ 
+-- 
+1.8.3.1
+

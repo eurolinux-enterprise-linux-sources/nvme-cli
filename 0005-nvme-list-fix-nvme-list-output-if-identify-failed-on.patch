@@ -1,0 +1,105 @@
+From 0ffab5433084c8f93d152938e58be2a2162d8059 Mon Sep 17 00:00:00 2001
+From: David Milburn <dmilburn@redhat.com>
+Date: Tue, 18 Dec 2018 15:55:49 -0600
+Subject: [PATCH 5/5] nvme list : fix nvme list output if identify failed on
+ device
+
+commit 6c10501eb7e8423892735c5aa3b8c135d26fdbf3
+Author: Eyal Ben David <eyalbe@il.ibm.com>
+Date:   Tue Aug 28 19:49:09 2018 +0300
+
+    nvme list : fix nvme list output if identify failed on device
+
+    changed files:
+    nvme.c        function list()
+    nvme-ioctl.c  function nvme_get_nsid() : return -errno if fstat fails
+
+Signed-off-by: David Milburn <dmilburn@redhat.com>
+---
+ nvme-ioctl.c |  2 +-
+ nvme.c       | 37 +++++++++++++++++++++++++------------
+ 2 files changed, 26 insertions(+), 13 deletions(-)
+
+diff --git a/nvme-ioctl.c b/nvme-ioctl.c
+index c28a0d9..5444806 100644
+--- a/nvme-ioctl.c
++++ b/nvme-ioctl.c
+@@ -74,7 +74,7 @@ int nvme_get_nsid(int fd)
+ 	int err = fstat(fd, &nvme_stat);
+ 
+ 	if (err < 0)
+-		return err;
++		return -errno;
+ 
+ 	if (!S_ISBLK(nvme_stat.st_mode)) {
+ 		fprintf(stderr,
+diff --git a/nvme.c b/nvme.c
+index 0722132..700a4d1 100644
+--- a/nvme.c
++++ b/nvme.c
+@@ -1580,37 +1580,50 @@ static int list(int argc, char **argv, struct command *cmd, struct plugin *plugi
+ 	list_items = calloc(n, sizeof(*list_items));
+ 	if (!list_items) {
+ 		fprintf(stderr, "can not allocate controller list payload\n");
+-		return ENOMEM;
++		ret = -ENOMEM;
++		goto cleanup_devices;
+ 	}
+ 
+ 	for (i = 0; i < n; i++) {
+ 		snprintf(path, sizeof(path), "%s%s", dev, devices[i]->d_name);
+ 		fd = open(path, O_RDONLY);
+ 		if (fd < 0) {
+-			fprintf(stderr, "can not open %s: %s\n", path,
++			fprintf(stderr, "cannot open %s: %s\n", path,
+ 					strerror(errno));
+-			return errno;
++			ret = -errno;
++			goto cleanup_list_items;
+ 		}
+ 		ret = get_nvme_info(fd, &list_items[list_cnt], path);
+ 		close(fd);
+-		if (ret)
++		if (ret == 0) {
++			list_cnt++;
++		}
++		else if (ret > 0) {
+ 			fprintf(stderr, "%s: failed to obtain nvme info: %s\n",
+-				path, strerror(errno));
++					path, nvme_status_to_string(ret));
++		}
++		else {
++			fprintf(stderr, "%s: failed to obtain nvme info: %s\n",
++					path, strerror(-ret));
++		}
++	}
++
++	if (list_cnt) {
++		if (fmt == JSON)
++			json_print_list_items(list_items, list_cnt);
+ 		else
+-			list_cnt++;
++			show_list_items(list_items, list_cnt);
+ 	}
+ 
+-	if (fmt == JSON)
+-		json_print_list_items(list_items, list_cnt);
+-	else
+-		show_list_items(list_items, list_cnt);
++ cleanup_list_items:
++	free(list_items);
+ 
++ cleanup_devices:
+ 	for (i = 0; i < n; i++)
+ 		free(devices[i]);
+ 	free(devices);
+-	free(list_items);
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ int __id_ctrl(int argc, char **argv, struct command *cmd, struct plugin *plugin, void (*vs)(__u8 *vs, struct json_object *root))
+-- 
+1.8.3.1
+
