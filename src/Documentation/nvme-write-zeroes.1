@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: nvme-zeroes
-.\"    Author: [FIXME: author] [see http://www.docbook.org/tdg5/en/html/author]
-.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 04/08/2019
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 05/18/2017
 .\"    Manual: NVMe Manual
 .\"    Source: NVMe
 .\"  Language: English
 .\"
-.TH "NVME\-ZEROES" "1" "04/08/2019" "NVMe" "NVMe Manual"
+.TH "NVME\-ZEROES" "1" "05/18/2017" "NVMe" "NVMe Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -38,7 +38,6 @@ nvme-write-zeroes \- Send an NVMe write zeroes command, return results
                         [\-\-prinfo=<prinfo> | \-p <prinfo>]
                         [\-\-app\-tag\-mask=<appmask> | \-m <appmask>]
                         [\-\-app\-tag=<apptag> | \-a <apptag>]
-                        [\-\-deac | \-d]
                         [\-\-limited\-retry | \-l]
                         [\-\-force\-unit\-access | \-f]
                         [\-\-namespace\-id=<nsid> | \-n <nsid>]
@@ -60,7 +59,7 @@ Number of logical blocks to write zeroes\&.
 .PP
 \-\-prinfo=<prinfo>, \-p <prinfo>
 .RS 4
-Protection Information field definition\&.
+Protection Information field defintion\&.
 .TS
 allbox tab(:);
 lt lt
@@ -121,11 +120,6 @@ Optional application tag when used with protection information\&.
 \-\-limited\-retry, \-l
 .RS 4
 Sets the limited retry flag\&.
-.RE
-.PP
-\-\-deac, \-d
-.RS 4
-Sets the DEAC bit, requesting controller deallocate the logical blocks\&.
 .RE
 .PP
 \-\-force\-unit\-access, \-f

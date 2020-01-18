@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.10" />
+<meta name="generator" content="AsciiDoc 8.6.9" />
 <title>nvme-id-ns(1)</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -740,7 +739,7 @@ nvme-id-ns(1) Manual Page
 <h2>NAME</h2>
 <div class="sectionbody">
 <p>nvme-show-regs -
-   Reads and shows the defined NVMe controller registers for NVMe over PCIe or the controller properties for NVMe over Fabrics.
+   Reads and shows the defined NVMe controller registers.
 </p>
 </div>
 </div>
@@ -749,8 +748,7 @@ nvme-id-ns(1) Manual Page
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>nvme show-regs</em> &lt;device&gt;       [--human-readable | -H]
-                                [--output-format=&lt;FMT&gt; | -o &lt;FMT&gt;]</pre>
+<pre class="content"><em>nvme show-regs</em> &lt;device&gt; [--human-readable | -H]</pre>
 <div class="attribution">
 </div></div>
 </div>
@@ -758,16 +756,12 @@ nvme-id-ns(1) Manual Page
 <div class="sect1">
 <h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>For the NVMe over PCIe device given, sends an identify namespace command and
-provides the result and returned structure.
-For the NVMe over Fabrics device given, sends a fabric command and provides
-the result and returned structure.</p></div>
+<div class="paragraph"><p>For the NVMe device given, sends an identify namespace command and
+provides the result and returned structure.</p></div>
 <div class="paragraph"><p>The &lt;device&gt; parameter is mandatory and must be the nvme admin character
-device (ex: /dev/nvme0). For NVMe over PCIe, the program uses knowledge of the
-sysfs layout to map the device to the pci resource stored there and mmaps the
-memory to get access to the registers. For NVMe over Fabrics, the programs
-sends a fabric command to get the properties of the target NVMe controller.
-Only the supported properties are displayed.</p></div>
+device (ex: /dev/nvme0). The program uses knowledge of the sysfs layout
+to map the device to the pci resource stored there and mmaps the memory
+to get access to the registers.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -782,19 +776,7 @@ Only the supported properties are displayed.</p></div>
 </dt>
 <dd>
 <p>
-       Display registers or supported properties in human readable format.
-</p>
-</dd>
-<dt class="hdlist1">
--o &lt;format&gt;
-</dt>
-<dt class="hdlist1">
---output-format=&lt;format&gt;
-</dt>
-<dd>
-<p>
-              Set the reporting format to <em>normal</em>, <em>json</em>, or
-              <em>binary</em>. Only one output format can be used at a time.
+       Display registers in human readable format.
 </p>
 </dd>
 </dl></div>
@@ -806,32 +788,20 @@ Only the supported properties are displayed.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Show the NVMe over PCIe controller registers or the NVMe over Fabric controller
-properties in a binary format:
+Show the nvme pci controller registers in a binary format:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme show-regs /dev/nvme0 -o binary</code></pre>
+<pre><code># nvme show-regs /dev/nvme0</code></pre>
 </div></div>
 </li>
 <li>
 <p>
-Show the NVMe over PCIe controller registers or the NVMe over Fabric controller
-properties in a human readable format:
+Show the nvme pci controller registers in a human readable format:
 </p>
 <div class="listingblock">
 <div class="content">
 <pre><code># nvme show-regs /dev/nvme0 -H</code></pre>
-</div></div>
-</li>
-<li>
-<p>
-Show the NVMe over PCIe controller registers or NVMe-oF controller properties
-in a json format:
-</p>
-<div class="listingblock">
-<div class="content">
-<pre><code># nvme show-regs /dev/nvme0 -o json</code></pre>
 </div></div>
 </li>
 </ul></div>
@@ -847,8 +817,7 @@ in a json format:
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated
- 2019-04-07 06:12:04 KST
+Last updated 2016-07-07 17:46:23 PDT
 </div>
 </div>
 </body>

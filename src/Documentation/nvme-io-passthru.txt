@@ -17,10 +17,9 @@ SYNOPSIS
 		[--data-len=<data-len> | -l <data-len>]
 		[--metadata-len=<len> | -m <len>]
 		[--read | -r ] [--write | -w]
-		[--input-file=<file> | -i <file>]
+		[--input-file=<file> | -f <file>]
 		[--timeout=<to> | -t <to>]
-		[--show-command | -s]
-		[--dry-run | -d]
+		[--show-command | --dry-run | -s]
 		[--raw-binary | -b]
 		[--prefill=<prefill> | -p <prefill>]
 
@@ -89,9 +88,7 @@ OPTIONS
 
 -d::
 --dry-run::
-	Do not actually send the command. If want to use --dry-run option,
-	--show-cmd option _must_ be set. Otherwise --dry-run option will be
-	_ignored_.
+	Do not actually send the command.
 
 -b::
 --raw-binary::

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: nvme-admin-passthru
-.\"    Author: [FIXME: author] [see http://www.docbook.org/tdg5/en/html/author]
-.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 04/08/2019
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 05/18/2017
 .\"    Manual: NVMe Manual
 .\"    Source: NVMe
 .\"  Language: English
 .\"
-.TH "NVME\-ADMIN\-PASSTHR" "1" "04/08/2019" "NVMe" "NVMe Manual"
+.TH "NVME\-ADMIN\-PASSTHR" "1" "05/18/2017" "NVMe" "NVMe Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -42,8 +42,7 @@ nvme-admin-passthru \- Submit an arbitrary admin command, return results
                 [\-\-input\-file=<file> | \-f <file>]
                 [\-\-read | \-r ] [\-\-write | \-w]
                 [\-\-timeout=<to> | \-t <to>]
-                [\-\-show\-command | \-s]
-                [\-\-dry\-run | \-d]
+                [\-\-show\-command | \-\-dry\-run | \-s]
                 [\-\-raw\-binary | \-b]
                 [\-\-prefill=<prefill> | \-p <prefill>]
 .fi
@@ -101,17 +100,9 @@ The data length for the buffer used for this command\&.
 The metadata length for the buffer used for this command\&.
 .RE
 .PP
-\-s, \-\-show\-cmd
+\-s, \-\-show\-cmd, \-\-dry\-run
 .RS 4
-Print out the command to be sent\&.
-.RE
-.PP
-\-d, \-\-dry\-run
-.RS 4
-Do not actually send the command\&. If want to use \-\-dry\-run option, \-\-show\-cmd option
-\fImust\fR
-be set\&. Otherwise \-\-dry\-run option will be
-\fIignored\fR\&.
+Do not actually send the command; print out the command that would be sent\&.
 .RE
 .PP
 \-b, \-\-raw\-binary

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: nvme-smart-log
-.\"    Author: [FIXME: author] [see http://www.docbook.org/tdg5/en/html/author]
-.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 04/08/2019
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 05/18/2017
 .\"    Manual: NVMe Manual
 .\"    Source: NVMe
 .\"  Language: English
 .\"
-.TH "NVME\-SMART\-LOG" "1" "04/08/2019" "NVMe" "NVMe Manual"
+.TH "NVME\-SMART\-LOG" "1" "05/18/2017" "NVMe" "NVMe Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -38,7 +38,7 @@ nvme-smart-log \- Send NVMe SMART log page request, returns result and log
 .fi
 .SH "DESCRIPTION"
 .sp
-Retrieves the NVMe SMART log page from an NVMe device and provides the returned structure\&.
+Retrieves the NVMe SMART log page from an NVMe device and provides the retuned structure\&.
 .sp
 The <device> parameter is mandatory and may be either the NVMe character device (ex: /dev/nvme0), or a namespace block device (ex: /dev/nvme0n1)\&.
 .sp
@@ -53,14 +53,6 @@ Retrieve the SMART log for the given nsid\&. This is optional and its success ma
 \-b, \-\-raw\-binary
 .RS 4
 Print the raw SMART log buffer to stdout\&.
-.RE
-.PP
-\-o <format>, \-\-output\-format=<format>
-.RS 4
-Set the reporting format to
-\fInormal\fR,
-\fIjson\fR, or
-\fIbinary\fR\&. Only one output format can be used at a time\&.
 .RE
 .SH "EXAMPLES"
 .sp

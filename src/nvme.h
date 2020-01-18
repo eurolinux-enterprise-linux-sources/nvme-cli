@@ -16,28 +16,12 @@
 #define _NVME_H
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <endian.h>
 #include "plugin.h"
 #include "json.h"
 
 #define unlikely(x) x
-
-#ifdef LIBUUID
-#include <uuid/uuid.h>
-#else
-typedef struct {
-	uint8_t b[16];
-} uuid_t;
-#endif
-
 #include "linux/nvme.h"
-
-struct nvme_effects_log_page {
-	__le32 acs[256];
-	__le32 iocs[256];
-	__u8   resv[2048];
-};
 
 struct nvme_error_log_page {
 	__u64	error_count;
@@ -48,9 +32,7 @@ struct nvme_error_log_page {
 	__u64	lba;
 	__u32	nsid;
 	__u8	vs;
-	__u8	resv[3];
-	__u64	cs;
-	__u8	resv2[24];
+	__u8	resv[35];
 };
 
 struct nvme_firmware_log_page {
@@ -62,6 +44,16 @@ struct nvme_firmware_log_page {
 
 /* idle and active power scales occupy the last 2 bits of the field */
 #define POWER_SCALE(s) ((s) >> 6)
+
+enum {
+	NVME_ID_CNS_NS			= 0x00,
+	NVME_ID_CNS_CTRL		= 0x01,
+	NVME_ID_CNS_NS_ACTIVE_LIST	= 0x02,
+	NVME_ID_CNS_NS_PRESENT_LIST	= 0x10,
+	NVME_ID_CNS_NS_PRESENT		= 0x11,
+	NVME_ID_CNS_CTRL_NS_LIST	= 0x12,
+	NVME_ID_CNS_CTRL_LIST		= 0x13,
+};
 
 struct nvme_host_mem_buffer {
 	__u32			hsize;
@@ -76,12 +68,6 @@ struct nvme_auto_pst {
 	__u32	rsvd32;
 };
 
-struct nvme_timestamp {
-	__u8 timestamp[6];
-	__u8 attr;
-	__u8 rsvd;
-};
-
 struct nvme_controller_list {
 	__le16 num;
 	__le16 identifier[];
@@ -91,7 +77,7 @@ struct nvme_bar_cap {
 	__u16	mqes;
 	__u8	ams_cqr;
 	__u8	to;
-	__u16	bps_css_nssrs_dstrd;
+	__u16	css_nssrs_dstrd;
 	__u8	mpsmax_mpsmin;
 	__u8	reserved;
 };
@@ -125,21 +111,6 @@ struct list_item {
 	unsigned            block;
 };
 
-struct ctrl_list_item {
-	char *name;
-	char *address;
-	char *transport;
-	char *state;
-	char *ana_state;
-};
-
-struct subsys_list_item {
-	char *name;
-	char *subsysnqn;
-	int nctrls;
-	struct ctrl_list_item *ctrls;
-};
-
 enum {
 	NORMAL,
 	JSON,
@@ -157,7 +128,4 @@ extern const char *devicename;
 int __id_ctrl(int argc, char **argv, struct command *cmd, struct plugin *plugin, void (*vs)(__u8 *vs, struct json_object *root));
 int	validate_output_format(char *format);
 
-struct subsys_list_item *get_subsys_list(int *subcnt, char *subsysnqn, __u32 nsid);
-void free_subsys_list(struct subsys_list_item *slist, int n);
-char *nvme_char_from_block(char *block);
 #endif /* _NVME_H */

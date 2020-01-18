@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.10" />
+<meta name="generator" content="AsciiDoc 8.6.7" />
 <title>nvme-error-log(1)</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -88,15 +87,9 @@ ul, ol, li > p {
 ul > li     { color: #aaa; }
 ul > li > * { color: black; }
 
-.monospaced, code, pre {
-  font-family: "Courier New", Courier, monospace;
-  font-size: inherit;
-  color: navy;
+pre {
   padding: 0;
   margin: 0;
-}
-pre {
-  white-space: pre-wrap;
 }
 
 #author {
@@ -226,7 +219,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; vertical-align: text-bottom; }
+span.image img { border-style: none; }
 a.image:visited { color: white; }
 
 dl {
@@ -422,6 +415,12 @@ div.unbreakable { page-break-inside: avoid; }
  *
  * */
 
+tt {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
+
 div.tableblock {
   margin-top: 1.0em;
   margin-bottom: 1.5em;
@@ -454,6 +453,12 @@ div.tableblock > table[frame="vsides"] {
  * html5 specific
  *
  * */
+
+.monospaced {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
 
 table.tableblock {
   margin-top: 1.0em;
@@ -534,8 +539,6 @@ body.manpage div.sectionbody {
 @media print {
   body.manpage div#toc { display: none; }
 }
-
-
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
@@ -749,7 +752,8 @@ nvme-error-log(1) Manual Page
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>nvme error-log</em> &lt;device&gt;  [--log-entries=&lt;entries&gt; | -e &lt;entries&gt;]
+<pre class="content"><em>nvme error-log</em> &lt;device&gt;  [--namespace-id=&lt;nsid&gt; | -n &lt;nsid&gt;]
+                         [--log-entries=&lt;entries&gt; | -e &lt;entries&gt;]
                          [--raw-binary | -b]
                          [--output-format=&lt;fmt&gt; | -o &lt;fmt&gt;]</pre>
 <div class="attribution">
@@ -760,7 +764,7 @@ nvme-error-log(1) Manual Page
 <h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Retrieves NVMe Error log page from an NVMe device and provides the
-returned structure.</p></div>
+retuned structure.</p></div>
 <div class="paragraph"><p>The &lt;device&gt; parameter is mandatory and may be either the NVMe character
 device (ex: /dev/nvme0), or a namespace block device (ex: /dev/nvme0n1).</p></div>
 <div class="paragraph"><p>On success, the returned error log structure may be returned in one of
@@ -773,6 +777,21 @@ printed to stdout for another program to parse.</p></div>
 <h2 id="_options">OPTIONS</h2>
 <div class="sectionbody">
 <div class="dlist"><dl>
+<dt class="hdlist1">
+-n &lt;nsid&gt;
+</dt>
+<dt class="hdlist1">
+--namespace-id=&lt;nsid&gt;
+</dt>
+<dd>
+<p>
+        Retrieve the Error Log for the given nsid. This is optional
+        and its success may depend on the device&#8217;s capabilities to
+        provide this log on a per-namespace basis (see the NVMe Identify
+        Controller for this capability). The default nsid to use is
+        0xffffffff for the device global error log.
+</p>
+</dd>
 <dt class="hdlist1">
 -e &lt;entries&gt;
 </dt>
@@ -822,7 +841,7 @@ Get the error log and print it in a human readable format:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme error-log /dev/nvme0</code></pre>
+<pre><tt># nvme error-log /dev/nvme0</tt></pre>
 </div></div>
 </li>
 <li>
@@ -831,7 +850,7 @@ Print the raw output to a file:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme error-log /dev/nvme0 --raw-binary &gt; error_log.raw</code></pre>
+<pre><tt># nvme error-log /dev/nvme0 --raw-binary &gt; error_log.raw</tt></pre>
 </div></div>
 <div class="paragraph"><p>It is probably a bad idea to not redirect stdout when using this mode.</p></div>
 </li>
@@ -848,8 +867,7 @@ Print the raw output to a file:
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated
- 2018-11-29 13:35:56 GMT
+Last updated 2016-06-06 15:26:18 MDT
 </div>
 </div>
 </body>

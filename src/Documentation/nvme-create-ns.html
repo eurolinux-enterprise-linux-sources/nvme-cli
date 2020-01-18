@@ -750,8 +750,7 @@ nvme-create-ns(1) Manual Page
                         [--ncap=&lt;ncap&gt; | -c &lt;ncap&gt;]
                         [--flbas=&lt;flbas&gt; | -f &lt;flbas&gt;]
                         [--dps=&lt;dps&gt; | -d &lt;dps&gt;]
-                        [--nmic=&lt;nmic&gt; | -m &lt;nmic&gt;]
-                        [--block-size=&lt;block-size&gt; | -b &lt;block-size&gt;]</pre>
+                        [--nmic=&lt;nmic&gt; | -m &lt;nmic&gt;]</pre>
 <div class="attribution">
 </div></div>
 </div>
@@ -801,7 +800,6 @@ device (ex: /dev/nvme0), or a namespace block device (ex: /dev/nvme0n1).</p></di
 <dd>
 <p>
         The namespace formatted logical block size setting.
-        Conflicts with --block-size argument.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -826,19 +824,6 @@ device (ex: /dev/nvme0), or a namespace block device (ex: /dev/nvme0n1).</p></di
         Namespace multipath and sharing capabilities.
 </p>
 </dd>
-<dt class="hdlist1">
--b
-</dt>
-<dt class="hdlist1">
---block-size
-</dt>
-<dd>
-<p>
-        Target block size the new namespace should be formatted as. Potential FLBAS
-  values will be values will be scanned and the lowest numbered will be
-  selected for the create-ns operation. Conflicts with --flbas argument.
-</p>
-</dd>
 </dl></div>
 </div>
 </div>
@@ -858,7 +843,7 @@ device (ex: /dev/nvme0), or a namespace block device (ex: /dev/nvme0n1).</p></di
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-28 17:49:54 MST
+Last updated 2016-05-16 12:47:58 EDT
 </div>
 </div>
 </body>

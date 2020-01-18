@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: nvme-get-feature
-.\"    Author: [FIXME: author] [see http://www.docbook.org/tdg5/en/html/author]
-.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 01/08/2019
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 05/18/2017
 .\"    Manual: NVMe Manual
 .\"    Source: NVMe
 .\"  Language: English
 .\"
-.TH "NVME\-GET\-FEATURE" "1" "01/08/2019" "NVMe" "NVMe Manual"
+.TH "NVME\-GET\-FEATURE" "1" "05/18/2017" "NVMe" "NVMe Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -37,7 +37,6 @@ nvme-get-feature \- Gets an NVMe feature, returns applicable results
                           [\-\-data\-len=<data\-len> | \-l <data\-len>]
                           [\-\-sel=<select> | \-s <select>]
                           [\-\-raw\-binary | \-b]
-                          [\-\-human\-readable | \-H]
 .fi
 .SH "DESCRIPTION"
 .sp
@@ -110,17 +109,12 @@ The data length for the buffer returned for this feature\&. Most known features 
 .PP
 \-\-cdw11=<cdw11>
 .RS 4
-The value for command dword 11, if applicable\&.
+The value for command dword 11, if applicable\&. Only known feature using this is the interrupt vector configuration feature\&.
 .RE
 .PP
 \-b, \-\-raw\-binary
 .RS 4
 Print the raw feature buffer to stdout if the feature returns a structure\&.
-.RE
-.PP
-\-H, \-\-human\-readable
-.RS 4
-This option will parse and format many of the bit fields into human\-readable formats\&.
 .RE
 .SH "EXAMPLES"
 .sp

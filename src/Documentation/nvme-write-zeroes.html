@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.10" />
+<meta name="generator" content="AsciiDoc 8.6.8" />
 <title>nvme-zeroes(1)</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -95,9 +94,7 @@ ul > li > * { color: black; }
   padding: 0;
   margin: 0;
 }
-pre {
-  white-space: pre-wrap;
-}
+
 
 #author {
   color: #527bbd;
@@ -226,7 +223,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; vertical-align: text-bottom; }
+span.image img { border-style: none; }
 a.image:visited { color: white; }
 
 dl {
@@ -755,7 +752,6 @@ nvme-zeroes(1) Manual Page
                         [--prinfo=&lt;prinfo&gt; | -p &lt;prinfo&gt;]
                         [--app-tag-mask=&lt;appmask&gt; | -m &lt;appmask&gt;]
                         [--app-tag=&lt;apptag&gt; | -a &lt;apptag&gt;]
-                        [--deac | -d]
                         [--limited-retry | -l]
                         [--force-unit-access | -f]
                         [--namespace-id=&lt;nsid&gt; | -n &lt;nsid&gt;]</pre>
@@ -803,7 +799,7 @@ nvme-zeroes(1) Manual Page
 </dt>
 <dd>
 <p>
-        Protection Information field definition.
+        Protection Information field defintion.
 </p>
 <div class="tableblock">
 <table rules="all"
@@ -888,17 +884,6 @@ metadata is passes.</p></td>
 </p>
 </dd>
 <dt class="hdlist1">
---deac
-</dt>
-<dt class="hdlist1">
--d
-</dt>
-<dd>
-<p>
-        Sets the DEAC bit, requesting controller deallocate the logical blocks.
-</p>
-</dd>
-<dt class="hdlist1">
 --force-unit-access
 </dt>
 <dt class="hdlist1">
@@ -936,8 +921,7 @@ NVME</code></pre>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated
- 2018-11-29 13:31:13 GMT
+Last updated 2016-11-15 18:10:54 EST
 </div>
 </div>
 </body>

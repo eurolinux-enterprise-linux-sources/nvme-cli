@@ -18,8 +18,7 @@ SYNOPSIS
 		[--input-file=<file> | -f <file>]
 		[--read | -r ] [--write | -w]
 		[--timeout=<to> | -t <to>]
-		[--show-command | -s]
-		[--dry-run | -d]
+		[--show-command | --dry-run | -s]
 		[--raw-binary | -b]
 		[--prefill=<prefill> | -p <prefill>]
 
@@ -84,13 +83,9 @@ OPTIONS
 
 -s::
 --show-cmd::
-	Print out the command to be sent.
-
--d::
 --dry-run::
-	Do not actually send the command. If want to use --dry-run option,
-	--show-cmd option _must_ be set. Otherwise --dry-run option will be
-	_ignored_.
+	Do not actually send the command; print out the command that
+	would be sent.
 
 -b::
 --raw-binary::

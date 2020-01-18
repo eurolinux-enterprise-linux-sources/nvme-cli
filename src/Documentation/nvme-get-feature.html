@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.8" />
+<meta name="generator" content="AsciiDoc 8.6.7" />
 <title>nvme-get-feature(1)</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -87,14 +87,10 @@ ul, ol, li > p {
 ul > li     { color: #aaa; }
 ul > li > * { color: black; }
 
-.monospaced, code, pre {
-  font-family: "Courier New", Courier, monospace;
-  font-size: inherit;
-  color: navy;
+pre {
   padding: 0;
   margin: 0;
 }
-
 
 #author {
   color: #527bbd;
@@ -419,6 +415,12 @@ div.unbreakable { page-break-inside: avoid; }
  *
  * */
 
+tt {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
+
 div.tableblock {
   margin-top: 1.0em;
   margin-bottom: 1.5em;
@@ -451,6 +453,12 @@ div.tableblock > table[frame="vsides"] {
  * html5 specific
  *
  * */
+
+.monospaced {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
 
 table.tableblock {
   margin-top: 1.0em;
@@ -531,8 +539,6 @@ body.manpage div.sectionbody {
 @media print {
   body.manpage div#toc { display: none; }
 }
-
-
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
@@ -750,8 +756,7 @@ nvme-get-feature(1) Manual Page
                           [--feature-id=&lt;fid&gt; | -f &lt;fid&gt;] [--cdw11=&lt;cdw11&gt;]
                           [--data-len=&lt;data-len&gt; | -l &lt;data-len&gt;]
                           [--sel=&lt;select&gt; | -s &lt;select&gt;]
-                          [--raw-binary | -b]
-                          [--human-readable | -H]</pre>
+                          [--raw-binary | -b]</pre>
 <div class="attribution">
 </div></div>
 </div>
@@ -864,7 +869,8 @@ cellspacing="0" cellpadding="4">
 </dt>
 <dd>
 <p>
-        The value for command dword 11, if applicable.
+        The value for command dword 11, if applicable. Only known feature
+        using this is the interrupt vector configuration feature.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -877,18 +883,6 @@ cellspacing="0" cellpadding="4">
 <p>
         Print the raw feature buffer to stdout if the feature returns
         a structure.
-</p>
-</dd>
-<dt class="hdlist1">
--H
-</dt>
-<dt class="hdlist1">
---human-readable
-</dt>
-<dd>
-<p>
-        This option will parse and format many of the bit fields
-        into human-readable formats.
 </p>
 </dd>
 </dl></div>
@@ -904,7 +898,7 @@ Retrieves the feature for Number of Queues, or feature id 7:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme get-feature /dev/nvme0 -f 7</code></pre>
+<pre><tt># nvme get-feature /dev/nvme0 -f 7</tt></pre>
 </div></div>
 </li>
 <li>
@@ -915,7 +909,7 @@ readable format:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme get-feature /dev/nvme0 -f 3</code></pre>
+<pre><tt># nvme get-feature /dev/nvme0 -f 3</tt></pre>
 </div></div>
 </li>
 <li>
@@ -926,7 +920,7 @@ will be displayed to the user in as a hex dump:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme get-feature /dev/nvme0 -f 0xc0 -l 512</code></pre>
+<pre><tt># nvme get-feature /dev/nvme0 -f 0xc0 -l 512</tt></pre>
 </div></div>
 </li>
 <li>
@@ -937,7 +931,7 @@ format:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme get-feature /dev/nvme0 -f 3 --raw-binary &gt; lba_range.raw</code></pre>
+<pre><tt># nvme get-feature /dev/nvme0 -f 3 --raw-binary &gt; lba_range.raw</tt></pre>
 </div></div>
 <div class="paragraph"><p>It is probably a bad idea to not redirect stdout when using this mode.</p></div>
 </li>
@@ -954,7 +948,7 @@ format:
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-02-07 09:54:27 MST
+Last updated 2016-02-26 08:27:10 MST
 </div>
 </div>
 </body>

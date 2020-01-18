@@ -20,8 +20,8 @@
 """
 Get Features Testcase:-
 
-Test the Mandatory features with get features command:-
-    1. 01h M Arbitration.
+Test the Mandetory features with get features command:-
+    1. 01h rbitration.
     2. 02h M Power Management.
     3. 04h M Temperature Threshold.
     4. 05h M Error Recovery.
@@ -37,19 +37,19 @@ from nose.tools import assert_equal
 from nvme_test import TestNVMe
 
 
-class TestNVMeGetMandatoryFeatures(TestNVMe):
+class TestNVMeGetMandetoryFeatures(TestNVMe):
 
     """
     Represents Get Features testcase.
 
         - Attributes:
-              - feature_id_list : list of the mandatory features.
+              - feature_id_list : list of the mandetory features.
               - get_vector_list_cmd : vector list collection for 09h.
               - vector_list : vector list to hold the interrupt vectors.
     """
 
     def __init__(self):
-        """ Pre Section for TestNVMeGetMandatoryFeatures """
+        """ Pre Section for TestNVMeGetMandetoryFeatures """
         TestNVMe.__init__(self)
         self.setup_log_dir(self.__class__.__name__)
         self.feature_id_list = ["0x01", "0x02", "0x04", "0x05", "0x07",
@@ -63,13 +63,13 @@ class TestNVMeGetMandatoryFeatures(TestNVMe):
         self.vector_list = proc.stdout.read().strip().split(" ")
 
     def __del__(self):
-        """ Post Section for TestNVMeGetMandatoryFeatures
+        """ Post Section for TestNVMeGetMandetoryFeatures
 
             Call super class's destructor.
         """
         TestNVMe.__del__(self)
 
-    def get_mandatory_features(self, feature_id):
+    def get_mandetory_features(self, feature_id):
         """ Wrapper for NVMe get features command
             - Args:
                 - feature_id : feature id to be used with get feature command.
@@ -85,7 +85,7 @@ class TestNVMeGetMandatoryFeatures(TestNVMe):
                                         shell=True,
                                         stdout=subprocess.PIPE)
                 feature_output = proc.communicate()[0]
-                print(feature_output)
+                print feature_output
                 assert_equal(proc.wait(), 0)
         else:
             get_feat_cmd = "nvme get-feature " + self.ctrl + \
@@ -94,10 +94,10 @@ class TestNVMeGetMandatoryFeatures(TestNVMe):
                                     shell=True,
                                     stdout=subprocess.PIPE)
             feature_output = proc.communicate()[0]
-            print(feature_output)
+            print feature_output
             assert_equal(proc.wait(), 0)
 
-    def test_get_mandatory_features(self):
+    def test_get_mandetory_features(self):
         """ Testcase main """
         for feature_id in self.feature_id_list:
-            self.get_mandatory_features(feature_id)
+            self.get_mandetory_features(feature_id)

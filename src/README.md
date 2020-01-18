@@ -3,39 +3,17 @@ NVM-Express user space tooling for Linux.
 
 To install, run:
 
-   # make && make install
+  # make && make install
 
 If not sure how to use, find the top-level documentation with:
 
-   # man nvme
+  # man nvme
 
 Or find a short summary with:
 
-   # nvme help
+  # nvme help
 
 ## Distro Support
-
-### Alpine Linux
-
-nvme-cli is tested on Alpine Linux 3.3.  Install it using:
-
-    # apk update && apk add nvme-cli nvme-cli-doc
-
-if you just use the device you're after, it will work flawless.
-```
-# nvme smart-log /dev/nvme0
-Smart Log for NVME device:/dev/nvme0 namespace-id:ffffffff
-critical_warning                    : 0
-temperature                         : 49 C
-available_spare                     : 100%
-```
-
-### Arch Linux
-
-Install from AUR, e.g.:
-```
-$ yay -S nvme-cli-git
-```
 
 ### Fedora
 
@@ -44,36 +22,6 @@ package manager.  For example:
 
     $ sudo dnf install nvme-cli
 
-### FreeBSD
-
-`nvme-cli` is available in the FreeBSD Ports Collection.  A prebuilt binary
-package can be installed with:
-
-```console
-# pkg install nvme-cli
-```
-
-### Gentoo
-
-nvme-cli is available and tested in portage:
-```
-$ emerge -av nvme-cli
-```
-
-### Nix(OS)
-
-The attribute is named `nvme-cli` and can e.g. be installed with:
-```
-$ nix-env -f '<nixpkgs>' -iA nvme-cli
-```
-
-### openSUSE Tumbleweed
-
-nvme-cli is available in openSUSE Tumbleweed. You can install it using zypper.
-For example:
-
-    $ sudo zypper install nvme-cli
-
 ### Ubuntu
 
 nvme-cli is supported in the Universe package sources for Xenial for
@@ -81,7 +29,7 @@ many architectures. For a complete list try running:
   ```
   rmadison nvme-cli
    nvme-cli | 0.3-1 | xenial/universe | source, amd64, arm64, armhf, i386, powerpc, ppc64el, s390x
-  ```
+  ```  
 A Debian based package for nvme-cli is currently maintained as a
 Ubuntu PPA. Right now there is support for Trusty, Vivid and Wiley. To
 install nvme-cli using this approach please perform the following
@@ -108,6 +56,35 @@ steps:
    ```
    otherwise you will see information about each NVMe device installed
    in the system.
+   
+### AlpineLinux
+
+nvme-cli is tested on AlpineLinux 3.3.  Install it using:
+
+    # akp update && apk add nvme-cli nvme-cli-doc
+
+    if you just use the device you're after, it will work flawless.
+    ```
+    # nvme smart-log /dev/nvme0
+Smart Log for NVME device:/dev/nvme0 namespace-id:ffffffff
+critical_warning                    : 0
+temperature                         : 49 C
+available_spare                     : 100%
+    ```
+   
+### openSUSE Tumbleweed
+
+nvme-cli is available in openSUSE Tumbleweed. You can install it using zypper.
+For example:
+
+    $ sudo zypper install nvme-cli
+
+### Arch Linux
+
+Install from AUR, e.g.:
+```
+$ yaourt -S nvme-cli-git
+```
 
 ### Other Distros
 
@@ -126,18 +103,17 @@ events are created by Linux kernel's 'ftrace' component.
 
 The first thing to do is define a new command entry in the command
 list. This is declared in nvme-builtin.h. Simply append a new "ENTRY" into
-the list. The ENTRY normally takes three arguments: the "name" of the 
-subcommand (this is what the user will type at the command line to invoke
-your command), a short help description of what your command does, and the
-name of the function callback that you're going to write. Additionally,
-You can declare an alias name of subcommand with fourth argument, if needed.
+the list. The ENTRY takes three arguments: the "name" of the subcommand
+(this is what the user will type at the command line to invoke your
+command), a short help description of what your command does, and the
+name of the function callback that you're going to write.
 
 After the ENTRY is defined, you need to implement the callback. It takes
 four arguments: argc, argv, the command structure associated with the
 callback, and the plug-in structure that contains that command. The
 prototype looks like this:
 
-  ```c
+  ```
   int f(int argc, char **argv, struct command *cmd, struct plugin *plugin);
   ```
 
@@ -160,7 +136,7 @@ There is a very important order on how to define the plugin. The following
 is a basic example on how to start this:
 
 File: foo-plugin.h
-```c
+```
 #undef CMD_INC_FILE
 #define CMD_INC_FILE foo-plugin
 
@@ -190,7 +166,7 @@ To get started from the above example, we just need to define "CREATE_CMD"
 and include the header:
 
 File: foo-plugin.c
-```c
+```
 #define CREATE_CMD
 #include "foo-plugin.h"
 ```

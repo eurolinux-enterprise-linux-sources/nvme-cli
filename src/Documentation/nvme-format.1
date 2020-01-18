@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: nvme-format
-.\"    Author: [FIXME: author] [see http://www.docbook.org/tdg5/en/html/author]
-.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 04/08/2019
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 05/18/2017
 .\"    Manual: NVMe Manual
 .\"    Source: NVMe
 .\"  Language: English
 .\"
-.TH "NVME\-FORMAT" "1" "04/08/2019" "NVMe" "NVMe Manual"
+.TH "NVME\-FORMAT" "1" "05/18/2017" "NVMe" "NVMe Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -34,13 +34,12 @@ nvme-format \- Format an NVMe device
 .nf
 \fInvme format\fR <device> [\-\-namespace\-id=<nsid> | \-n <nsid>]
                     [\-\-lbaf=<lbaf> | \-l <lbaf>]
-                    [\-\-block\-size=<block size | \-b <block size>]
                     [\-\-ses=<ses> | \-s <ses>]
                     [\-\-pil=<pil> | \-p <pil>]
                     [\-\-pi=<pi> | \-i <pi>]
                     [\-\-ms=<ms> | \-m <ms>]
                     [\-\-reset | \-r ]
-                    [\-\-timeout=<timeout> | \-t <timeout> ]
+                    [\-\-timeout | \-t ]
 .fi
 .SH "DESCRIPTION"
 .sp
@@ -58,12 +57,7 @@ Send the format command for the specified nsid\&. This can be used to override t
 .PP
 \-l <lbaf>, \-\-lbaf=<lbaf>
 .RS 4
-LBA Format: This field specifies the LBA format to apply to the NVM media\&. This corresponds to the LBA formats indicated in the Identify Namespace command\&. Conflicts with \-\-block\-size argument\&. Defaults to 0\&.
-.RE
-.PP
-\-b <block size>, \-\-block\-size=<block size>
-.RS 4
-Block Size: This field is used to specify the target block size to format to\&. Potential lbaf values will be scanned and the lowest numbered will be selected for the format operation\&. Conflicts with \-\-lbaf argument\&.
+LBA Format: This field specifies the LBA format to apply to the NVM media\&. This corresponds to the LBA formats indicated in the Identify Namespace command\&. Defaults to 0\&.
 .RE
 .PP
 \-s <ses>, \-\-ses=<ses>

@@ -748,13 +748,12 @@ nvme-format(1) Manual Page
 <div class="verseblock">
 <pre class="content"><em>nvme format</em> &lt;device&gt; [--namespace-id=&lt;nsid&gt; | -n &lt;nsid&gt;]
                     [--lbaf=&lt;lbaf&gt; | -l &lt;lbaf&gt;]
-                    [--block-size=&lt;block size | -b &lt;block size&gt;]
                     [--ses=&lt;ses&gt; | -s &lt;ses&gt;]
                     [--pil=&lt;pil&gt; | -p &lt;pil&gt;]
                     [--pi=&lt;pi&gt; | -i &lt;pi&gt;]
                     [--ms=&lt;ms&gt; | -m &lt;ms&gt;]
                     [--reset | -r ]
-                    [--timeout=&lt;timeout&gt; | -t &lt;timeout&gt; ]</pre>
+                    [--timeout | -t ]</pre>
 <div class="attribution">
 </div></div>
 </div>
@@ -805,22 +804,7 @@ for the new block size to be visible.</p></div>
 <p>
         LBA Format: This field specifies the LBA format to apply to the NVM
         media. This corresponds to the LBA formats indicated in the
-        Identify Namespace command. Conflicts with --block-size argument.
-        Defaults to 0.
-</p>
-</dd>
-<dt class="hdlist1">
--b &lt;block size&gt;
-</dt>
-<dt class="hdlist1">
---block-size=&lt;block size&gt;
-</dt>
-<dd>
-<p>
-        Block Size: This field is used to specify the target block size to
-        format to. Potential lbaf values will be scanned and the lowest
-        numbered will be selected for the format operation. Conflicts with
-        --lbaf argument.
+        Identify Namespace command. Defaults to 0.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1013,7 +997,7 @@ information:
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-01-28 17:42:37 MST
+Last updated 2016-10-26 15:41:15 EDT
 </div>
 </div>
 </body>

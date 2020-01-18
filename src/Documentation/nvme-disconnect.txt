@@ -3,12 +3,12 @@ nvme-disconnect(1)
 
 NAME
 ----
-nvme-disconnect - Disconnect one or more Fabrics controller(s).
+nvme-disconnect - Disonnect one or more Fabrics controller(s).
 
 SYNOPSIS
 --------
 [verse]
-'nvme disconnect'
+'nvme connect'
 		[--nqn=<subnqn>           | -n <subnqn>]
 		[--device=<device>        | -d <device>]
 
@@ -44,6 +44,8 @@ nqn.2014-08.com.example:nvme:nvm-subsystem-sn-d78432:
 +
 ------------
 # nvme disconnect --device=nvme4
+------------
+
 ------------
 
 SEE ALSO

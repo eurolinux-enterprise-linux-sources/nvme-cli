@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.10" />
+<meta name="generator" content="AsciiDoc 8.6.8" />
 <title>nvme-disconnect(1)</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -95,9 +94,7 @@ ul > li > * { color: black; }
   padding: 0;
   margin: 0;
 }
-pre {
-  white-space: pre-wrap;
-}
+
 
 #author {
   color: #527bbd;
@@ -226,7 +223,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; vertical-align: text-bottom; }
+span.image img { border-style: none; }
 a.image:visited { color: white; }
 
 dl {
@@ -740,7 +737,7 @@ nvme-disconnect(1) Manual Page
 <h2>NAME</h2>
 <div class="sectionbody">
 <p>nvme-disconnect -
-   Disconnect one or more Fabrics controller(s).
+   Disonnect one or more Fabrics controller(s).
 </p>
 </div>
 </div>
@@ -749,7 +746,7 @@ nvme-disconnect(1) Manual Page
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>nvme disconnect</em>
+<pre class="content"><em>nvme connect</em>
                 [--nqn=&lt;subnqn&gt;           | -n &lt;subnqn&gt;]
                 [--device=&lt;device&gt;        | -d &lt;device&gt;]</pre>
 <div class="attribution">
@@ -820,11 +817,10 @@ Disconnect the controller nvme4
 </div></div>
 </li>
 </ul></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_see_also">SEE ALSO</h2>
-<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre><code>SEE ALSO</code></pre>
+</div></div>
 <div class="paragraph"><p>nvme-connect(1)</p></div>
 </div>
 </div>
@@ -838,8 +834,7 @@ Disconnect the controller nvme4
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated
- 2019-04-04 01:17:26 KST
+Last updated 2016-11-17 11:43:34 EST
 </div>
 </div>
 </body>

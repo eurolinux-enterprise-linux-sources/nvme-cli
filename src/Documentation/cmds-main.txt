@@ -31,17 +31,8 @@ linknvme:nvme-get-feature[1]::
 linknvme:nvme-get-log[1]::
 	Generic Get Log
 
-linknvme:nvme-telemetry-log[1]::
-	Telemetry Host-Initiated Log
-
 linknvme:nvme-smart-log[1]::
 	Retrieve Smart Log
-
-linknvme:nvme-endurance-log[1]::
-	Retrieve endurance Log
-
-linknvme:nvme-effects-log[1]::
-	Retrieve effects Log
 
 linknvme:nvme-get-ns-id[1]::
 	Retrieve namespace identifier
@@ -72,9 +63,6 @@ linknvme:nvme-io-passthru[1]::
 
 linknvme:nvme-list-ns[1]::
 	List all nvme namespaces
-
-linknvme:nvme-ns-descs[1]::
-	Identify Namespace Identification Descriptor
 
 linknvme:nvme-list[1]::
 	List all nvme controllers
@@ -121,17 +109,6 @@ linknvme:nvme-show-regs[1]::
 linknvme:nvme-discover[1]::
 	Send Get Log Page request to Discovery Controller
 
-linknvme:nvme-connect-all[1]::
-	Discover and connect to all NVMe-over-Fabrics subsystems
-
 linknvme:nvme-connect[1]::
 	Connect to an NVMe-over-Fabrics subsystem
 
-linknvme:nvme-disconnect[1]::
-	Disconnect from an NVMe-over-Fabrics subsystem
-
-linknvme:nvme-disconnect-all[1]::
-	Disconnect from all NVMe-over-Fabrics subsystems
-
-linknvme:nvme-get-property[1]::
-	Reads and shows NVMe-over-Fabrics controller property

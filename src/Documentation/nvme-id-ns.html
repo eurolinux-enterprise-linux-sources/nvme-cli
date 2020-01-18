@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.10" />
+<meta name="generator" content="AsciiDoc 8.6.7" />
 <title>nvme-id-ns(1)</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -88,15 +87,9 @@ ul, ol, li > p {
 ul > li     { color: #aaa; }
 ul > li > * { color: black; }
 
-.monospaced, code, pre {
-  font-family: "Courier New", Courier, monospace;
-  font-size: inherit;
-  color: navy;
+pre {
   padding: 0;
   margin: 0;
-}
-pre {
-  white-space: pre-wrap;
 }
 
 #author {
@@ -226,7 +219,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; vertical-align: text-bottom; }
+span.image img { border-style: none; }
 a.image:visited { color: white; }
 
 dl {
@@ -422,6 +415,12 @@ div.unbreakable { page-break-inside: avoid; }
  *
  * */
 
+tt {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
+
 div.tableblock {
   margin-top: 1.0em;
   margin-bottom: 1.5em;
@@ -454,6 +453,12 @@ div.tableblock > table[frame="vsides"] {
  * html5 specific
  *
  * */
+
+.monospaced {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
 
 table.tableblock {
   margin-top: 1.0em;
@@ -534,8 +539,6 @@ body.manpage div.sectionbody {
 @media print {
   body.manpage div#toc { display: none; }
 }
-
-
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
@@ -751,7 +754,6 @@ nvme-id-ns(1) Manual Page
 <div class="verseblock">
 <pre class="content"><em>nvme id-ns</em> &lt;device&gt; [-v | --vendor-specific] [-b | --raw-binary]
                     [--namespace-id=&lt;nsid&gt; | -n &lt;nsid&gt;] [-f | --force]
-                    [--human-readable | -H]
                     [--output-format=&lt;fmt&gt; | -o &lt;fmt&gt;]</pre>
 <div class="attribution">
 </div></div>
@@ -764,7 +766,7 @@ nvme-id-ns(1) Manual Page
 provides the result and returned structure.</p></div>
 <div class="paragraph"><p>The &lt;device&gt; parameter is mandatory and may be either the NVMe character
 device (ex: /dev/nvme0), or a namespace block device (ex: /dev/nvme0n1).
-If the character device is given, the <code>'--namespace-id'</code> option is
+If the character device is given, the <tt>'--namespace-id'</tt> option is
 mandatory, otherwise it will use the ns-id of the namespace for the block
 device you opened. For block devices, the ns-id used can be overridden
 with the same option.</p></div>
@@ -798,7 +800,7 @@ raw buffer may be printed to stdout.</p></div>
 </dt>
 <dd>
 <p>
-        Request controller return the identify namespace structure even
+        Request controller return the indentify namespace structure even
         if the namespace is not attached to the controller. This is valid
         only for controllers at or newer than revision 1.2. Controllers
         at revision lower than this may interpret the command incorrectly.
@@ -867,7 +869,7 @@ fields in a human readable format:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme id-ns /dev/nvme0n1</code></pre>
+<pre><tt># nvme id-ns /dev/nvme0n1</tt></pre>
 </div></div>
 </li>
 <li>
@@ -876,9 +878,9 @@ If using the character device or overriding namespace id:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme id-ns /dev/nvme0 -n 1
+<pre><tt># nvme id-ns /dev/nvme0 -n 1
 # nvme id-ns /dev/nvme0n1 -n 1
-# nvme id-ns /dev/nvme0 --namespace-id=1</code></pre>
+# nvme id-ns /dev/nvme0 --namespace-id=1</tt></pre>
 </div></div>
 </li>
 <li>
@@ -888,8 +890,8 @@ the vendor unique field:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme id-ns /dev/nvme0n1 --vendor-specific
-# nvme id-ns /dev/nvme0n1 -v</code></pre>
+<pre><tt># nvme id-ns /dev/nvme0n1 --vendor-specific
+# nvme id-ns /dev/nvme0n1 -v</tt></pre>
 </div></div>
 <div class="paragraph"><p>The above will dump the 'vs' buffer in hex since it doesn&#8217;t know how to
 interpret it.</p></div>
@@ -900,8 +902,8 @@ Have the program return the raw structure in binary:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme id-ns /dev/nvme0n1 --raw-binary &gt; id_ns.raw
-# nvme id-ns /dev/nvme0n1 -b &gt; id_ns.raw</code></pre>
+<pre><tt># nvme id-ns /dev/nvme0n1 --raw-binary &gt; id_ns.raw
+# nvme id-ns /dev/nvme0n1 -b &gt; id_ns.raw</tt></pre>
 </div></div>
 <div class="paragraph"><p>It is probably a bad idea to not redirect stdout when using this mode.</p></div>
 </li>
@@ -912,18 +914,18 @@ can parse the raw buffer.
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme id-ns /dev/nvme0n1 --raw-binary | nvme_parse_id_ns</code></pre>
+<pre><tt># nvme id-ns /dev/nvme0n1 --raw-binary | nvme_parse_id_ns</tt></pre>
 </div></div>
 <div class="paragraph"><p>The parse program in the above example can be a program that shows the
 structure in a way you like. The following program is such an example
-that will parse it and can accept the output through a pipe, <code>'|'</code>,
-as shown in the above example, or you can <code>'cat'</code> a saved output buffer
+that will parse it and can accept the output through a pipe, <tt>'|'</tt>,
+as shown in the above example, or you can <tt>'cat'</tt> a saved output buffer
 to it.</p></div>
 </li>
 </ul></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>/* File: nvme_parse_id_ns.c */
+<pre><tt>/* File: nvme_parse_id_ns.c */
 
 #include &lt;linux/nvme.h&gt;
 #include &lt;stdio.h&gt;
@@ -940,7 +942,7 @@ int main(int argc, char **argv)
         printf("nsze : %#llx\n", ns-&gt;nsze);
         printf("ncap : %#llx\n", ns-&gt;ncap);
         return 0;
-}</code></pre>
+}</tt></pre>
 </div></div>
 </div>
 </div>
@@ -954,8 +956,7 @@ int main(int argc, char **argv)
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated
- 2018-11-29 13:36:39 GMT
+Last updated 2016-06-06 15:25:27 MDT
 </div>
 </div>
 </body>

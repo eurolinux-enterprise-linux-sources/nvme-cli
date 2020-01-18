@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.10" />
+<meta name="generator" content="AsciiDoc 8.6.7" />
 <title>nvme-get-log(1)</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -88,15 +87,9 @@ ul, ol, li > p {
 ul > li     { color: #aaa; }
 ul > li > * { color: black; }
 
-.monospaced, code, pre {
-  font-family: "Courier New", Courier, monospace;
-  font-size: inherit;
-  color: navy;
+pre {
   padding: 0;
   margin: 0;
-}
-pre {
-  white-space: pre-wrap;
 }
 
 #author {
@@ -226,7 +219,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; vertical-align: text-bottom; }
+span.image img { border-style: none; }
 a.image:visited { color: white; }
 
 dl {
@@ -422,6 +415,12 @@ div.unbreakable { page-break-inside: avoid; }
  *
  * */
 
+tt {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
+
 div.tableblock {
   margin-top: 1.0em;
   margin-bottom: 1.5em;
@@ -454,6 +453,12 @@ div.tableblock > table[frame="vsides"] {
  * html5 specific
  *
  * */
+
+.monospaced {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+}
 
 table.tableblock {
   margin-top: 1.0em;
@@ -534,8 +539,6 @@ body.manpage div.sectionbody {
 @media print {
   body.manpage div#toc { display: none; }
 }
-
-
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
@@ -751,12 +754,8 @@ nvme-get-log(1) Manual Page
 <div class="verseblock">
 <pre class="content"><em>nvme get-log</em> &lt;device&gt; [--log-id=&lt;log-id&gt; | -i &lt;log-id&gt;]
                       [--log-len=&lt;log-len&gt; | -l &lt;log-len&gt;]
-                      [--aen=&lt;aen&gt; | -a &lt;aen&gt;]
                       [--namespace-id=&lt;nsid&gt; | -n &lt;nsid&gt;]
-                      [--raw-binary | -b]
-                      [--lpo=&lt;offset&gt; | -o &lt;offset&gt;]
-                      [--lsp=&lt;field&gt; | -s &lt;field&gt;]
-                      [--rae | -r]</pre>
+                      [--raw-binary | -b]</pre>
 <div class="attribution">
 </div></div>
 </div>
@@ -765,7 +764,7 @@ nvme-get-log(1) Manual Page
 <h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Retrieves an arbitrary NVMe log page from an NVMe device and provides
-the returned structure.</p></div>
+the retuned structure.</p></div>
 <div class="paragraph"><p>The &lt;device&gt; parameter is mandatory and may be either the NVMe character
 device (ex: /dev/nvme0), or a namespace block device (ex: /dev/nvme0n1).</p></div>
 <div class="paragraph"><p>On success, the returned log structure may be returned in one of several
@@ -803,19 +802,6 @@ program to parse.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
--a &lt;aen&gt;
-</dt>
-<dt class="hdlist1">
---aen=&lt;aen&gt;
-</dt>
-<dd>
-<p>
-        Convenience field for extracting log information based on an
-        asynchronous event notification result. This will override log-id and
-        log-len, if set.
-</p>
-</dd>
-<dt class="hdlist1">
 -n &lt;nsid&gt;
 </dt>
 <dt class="hdlist1">
@@ -840,40 +826,6 @@ program to parse.</p></div>
         Print the raw log buffer to stdout.
 </p>
 </dd>
-<dt class="hdlist1">
--o &lt;offset&gt;
-</dt>
-<dt class="hdlist1">
---lpo=&lt;offset&gt;
-</dt>
-<dd>
-<p>
-        The log page offset specifies the location within a log page to start
-        returning data from. It&#8217;s Dword-aligned and 64-bits.
-</p>
-</dd>
-<dt class="hdlist1">
--s &lt;field&gt;
-</dt>
-<dt class="hdlist1">
---lsp=&lt;field&gt;
-</dt>
-<dd>
-<p>
-        The log specified field of LID.
-</p>
-</dd>
-<dt class="hdlist1">
--r
-</dt>
-<dt class="hdlist1">
---rae
-</dt>
-<dd>
-<p>
-        Retain an Asynchronous Event.
-</p>
-</dd>
 </dl></div>
 </div>
 </div>
@@ -887,7 +839,7 @@ Get 512 bytes from log page 2
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme get-log /dev/nvme0 --log-id=2 --log-len=512</code></pre>
+<pre><tt># nvme get-log /dev/nvme0 --log-id=2 --log-len=512</tt></pre>
 </div></div>
 <div class="paragraph"><p>The above example will get log page 2 (SMART), and request 512
 bytes. On success, the returned log will be dumped in hex and not
@@ -899,8 +851,8 @@ Have the program return the raw log page in binary:
 </p>
 <div class="listingblock">
 <div class="content">
-<pre><code># nvme get-log /dev/nvme0 -log-id=2 --log-len=512 --raw-binary &gt; log_page_2.raw
-# nvme get-log /dev/nvme0 -i 2 -l 512 -b &gt; log_page_2.raw</code></pre>
+<pre><tt># nvme get-log /dev/nvme0 -log-id=2 --log-len=512 --raw-binary &gt; log_page_2.raw
+# nvme get-log /dev/nvme0 -i 2 -l 512 -b &gt; log_page_2.raw</tt></pre>
 </div></div>
 <div class="paragraph"><p>It is not a good idea to not redirect stdout when using this mode.</p></div>
 </li>
@@ -917,8 +869,7 @@ Have the program return the raw log page in binary:
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated
- 2018-06-28 16:56:55 UTC
+Last updated 2015-05-11 13:55:59 MDT
 </div>
 </div>
 </body>
